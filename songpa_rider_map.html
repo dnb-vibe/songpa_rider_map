@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>🍚 라이더 배-네핏</title>
+  <style>
+    :root {
+      --primary: #2AC1BC;       /* 배민 민트 */
+      --primary-dark: #1FA39E;
+      --accent: #FF6B35;
+      --text: #1a1a1a;
+      --text-sub: #6b7280;
+      --bg: #f7f8f9;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow: hidden;
+    }
+    .app { display: flex; flex-direction: column; height: 100%; }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 14px 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+    .header p { font-size: 12px; opacity: 0.92; margin-top: 3px; letter-spacing: -0.2px; }
+
+    .map-wrap { flex: 1; position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    .status {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white; padding: 12px 20px;
+      border-radius: 999px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      font-size: 13px; color: var(--text-sub);
+      z-index: 100;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--bg);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .count-pill {
+      position: absolute; top: 12px; left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      z-index: 5;
+    }
+    .count-pill b { color: var(--primary-dark); }
+
+    /* 배경 dim */
+    .backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.35);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+      z-index: 40;
+    }
+    .backdrop.open { opacity: 1; pointer-events: auto; }
+
+    /* 바텀시트 */
+    .sheet {
+      position: fixed; left: 0; right: 0; bottom: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -6px 24px rgba(0,0,0,0.12);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+      z-index: 50;
+      max-height: 80vh;
+      display: flex; flex-direction: column;
+    }
+    .sheet.open { transform: translateY(0); }
+
+    /* 데스크톱: 가운데 정렬, 폭 500px 카드 형태 */
+    @media (min-width: 769px) {
+      .sheet {
+        left: 50%;
+        right: auto;
+        width: 500px;
+        max-width: 500px;
+        bottom: 24px;
+        border-radius: 20px;
+        transform: translate(-50%, calc(100% + 24px));
+        max-height: calc(100vh - 48px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+      }
+      .sheet.open { transform: translate(-50%, 0); }
+    }
+
+    .sheet-handle {
+      width: 40px; height: 4px;
+      background: #d1d5db;
+      border-radius: 2px;
+      margin: 10px auto 4px;
+      flex-shrink: 0;
+    }
+    .sheet-close {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--bg); border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 16px; cursor: pointer;
+      color: var(--text-sub);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sheet-content {
+      padding: 8px 18px 24px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .r-name {
+      font-size: 20px; font-weight: 800;
+      letter-spacing: -0.4px;
+      padding-right: 36px;
+      margin-bottom: 4px;
+    }
+    .r-loc {
+      font-size: 12px;
+      color: var(--text-sub);
+      line-height: 1.45;
+      word-break: keep-all;
+      margin-bottom: 14px;
+    }
+
+    .badge-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .badge-time { background: #FFF3E6; color: #D97706; }
+    .badge-discount { background: #E6F9F8; color: var(--primary-dark); }
+
+    .slider {
+      position: relative;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .slider-img {
+      width: 100%;
+      aspect-ratio: 5 / 2;   /* 기존 4/3 → 5/2 로 변경 (높이 약 53%로 감소) */
+      object-fit: cover;
+      display: block;
+      background: var(--bg);
+    }
+    .slider-arrow {
+      position: absolute; top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white; border: none;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      font-size: 14px; line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    .slider-arrow:active { background: rgba(0,0,0,0.8); }
+    .slider-arrow.prev { left: 8px; }
+    .slider-arrow.next { right: 8px; }
+    .slider-dots {
+      position: absolute; bottom: 8px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 6px;
+      padding: 5px 10px;
+      background: rgba(0,0,0,0.45);
+      border-radius: 999px;
+    }
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.55);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .dot.active { background: white; transform: scale(1.15); }
+
+    /* 마커 위 항상 표시되는 식당명 라벨 */
+    .marker-label {
+      position: relative;
+      background: rgba(255, 255, 255, 0.72);
+      -webkit-backdrop-filter: blur(2px);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 5px;
+      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      /* 반투명 배경에서도 글자 가독성 확보용 흰색 광택 */
+      text-shadow:
+        0 0 3px rgba(255, 255, 255, 0.95),
+        0 1px 1px rgba(255, 255, 255, 0.85);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      /* 마커 바로 위에 거의 닿게 (꼬리 제거) */
+      transform: translateY(-34px);
+      pointer-events: none;
+    }
+
+    .menu-block {
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .menu-label {
+      font-size: 11px;
+      color: var(--text-sub);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 6px;
+    }
+    .menu-name {
+      font-size: 15px; font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .menu-price {
+      font-size: 14px;
+      color: var(--text-sub);
+    }
+
+    .notice {
+      background: #FFF9E6;
+      border-left: 3px solid #F59E0B;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #78350F;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .naver-btn {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%;
+      padding: 14px;
+      background: #03C75A;
+      color: white;
+      text-align: center;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.2px;
+    }
+    .naver-btn:active { background: #02A94B; }
+
+    /* ───── 이용 안내: 접이식 바 ───── */
+    .guide-bar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 9;
+    }
+    .guide-bar-toggle {
+      width: 100%;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #E6F9F8;
+      border: none;
+      padding: 11px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      text-align: left;
+      font-family: inherit;
+    }
+    .guide-bar-toggle:active { background: #D6F2F0; }
+    .guide-chevron {
+      font-size: 14px;
+      transition: transform 0.25s ease;
+      display: inline-block;
+    }
+    .guide-bar.open .guide-chevron { transform: rotate(180deg); }
+    .guide-bar-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .guide-bar.open .guide-bar-content { max-height: 600px; }
+    .guide-body {
+      padding: 14px 18px 18px;
+      background: #F5FBFB;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .guide-body p { margin-bottom: 8px; }
+    .guide-body .section-title {
+      margin-top: 10px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .guide-body ol {
+      margin: 4px 0 4px 20px;
+      padding: 0;
+    }
+    .guide-body li { margin-bottom: 4px; }
+    .guide-body .closing { margin-top: 10px; font-weight: 600; color: var(--primary-dark); }
+
+    /* ───── 이용 안내: 최초 방문 모달 ───── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-card {
+      background: white;
+      border-radius: 18px;
+      max-width: 420px;
+      width: 100%;
+      padding: 24px 22px 18px;
+      position: relative;
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      transform: scale(0.94);
+      transition: transform 0.25s ease;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    }
+    .modal-backdrop.open .modal-card { transform: scale(1); }
+    .modal-close {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--bg); border: none;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      font-size: 16px; cursor: pointer;
+      color: var(--text-sub);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      padding-right: 36px;
+      letter-spacing: -0.3px;
+    }
+    .modal-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+    .modal-body p { margin-bottom: 8px; }
+    .modal-body .section-title {
+      margin-top: 12px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .modal-body ol { margin: 4px 0 4px 20px; padding: 0; }
+    .modal-body li { margin-bottom: 4px; }
+    .modal-body .closing { margin-top: 12px; font-weight: 600; color: var(--primary-dark); }
+    .modal-ok {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      font-family: inherit;
+    }
+    .modal-ok:active { background: var(--primary-dark); }
+
+    /* ───── 헤더 우상단 CTA 버튼 ───── */
+    .header { position: relative; padding-right: 140px; }
+    .header-cta {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(255,255,255,0.95);
+      color: var(--primary-dark);
+      border: none;
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+      font-family: inherit;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+    }
+    .header-cta:active { background: white; transform: scale(0.97); }
+    @media (max-width: 380px) {
+      .header { padding-right: 122px; }
+      .header h1 { font-size: 16px; }
+      .header p { font-size: 11px; }
+      .header-cta { padding: 8px 12px; font-size: 12.5px; }
+    }
+
+    /* ───── 후기 폼 ───── */
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin: -8px 0 16px;
+      line-height: 1.5;
+      padding-right: 36px;
+    }
+    .form-field { margin-bottom: 14px; }
+    .form-field > label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .form-field .req { color: #EF4444; margin-left: 2px; }
+    .form-field .helper {
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      margin-top: -2px;
+    }
+    .rating-group { display: flex; gap: 7px; }
+    .rating-btn {
+      flex: 1;
+      height: 44px;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+    .rating-btn:active { transform: scale(0.94); }
+    .rating-btn.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(42,193,188,0.35);
+    }
+    .form-field select, .form-field textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: white;
+      color: var(--text);
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
+    }
+    .form-field select {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 32px;
+    }
+    .form-field select:focus, .form-field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .form-field textarea {
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.5;
+    }
+    .char-count {
+      text-align: right;
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-top: 4px;
+    }
+    .form-error {
+      background: #FEF2F2;
+      color: #B91C1C;
+      font-size: 13px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .modal-ok:disabled {
+      background: #B5E6E4;
+      cursor: not-allowed;
+    }
+
+    /* ───── 후기 제출 성공 화면 ───── */
+    .success-view { text-align: center; padding: 8px 4px 4px; }
+    .success-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-size: 34px;
+      font-weight: 800;
+    }
+    .success-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+    .success-msg {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 22px;
+    }
+
+    /* ───── 헤더 우상단 CTA 스택 (내 혜택 보기 + 후기 남기기) ───── */
+    .header-cta-stack {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      z-index: 5;
+    }
+    .header-cta-stack .header-cta {
+      position: static;
+      top: auto;
+      right: auto;
+    }
+    .header-cta--mint {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(42, 193, 188, 0.4);
+    }
+    .header-cta--mint:active { background: var(--primary-dark); transform: scale(0.97); }
+.header-cta--verify {
+      background: #2C3E50;
+      color: white;
+      box-shadow: 0 3px 8px rgba(44, 62, 80, 0.35);
+    }
+    .header-cta--verify:active { background: #1f2d3a; transform: scale(0.97); }
+    /* ───── 내 혜택 보기 모달 ───── */
+    .phone-example {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      background: var(--bg);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+    .phone-example strong {
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+    .phone-input {
+      width: 100%;
+      height: 60px;
+      padding: 0 16px;
+      font-size: 24px;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafbfc;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      text-align: center;
+      letter-spacing: 4px;
+      margin-bottom: 14px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .phone-input::placeholder {
+      color: #9ca3af;
+      letter-spacing: 4px;
+      font-weight: 600;
+    }
+    .phone-input:focus {
+      border-color: var(--primary);
+      background: white;
+    }
+    .form-error {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #ef4444;
+      background: #fef2f2;
+      border-radius: 8px;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+    .form-error[hidden] { display: none; }
+
+    .modal-back {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      color: var(--text-sub);
+      cursor: pointer;
+      padding: 4px 0;
+      margin-bottom: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+    .modal-back:hover { color: var(--primary-dark); }
+
+    .rider-id-banner {
+      background: var(--bg);
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 28px;
+      letter-spacing: -0.2px;
+    }
+    .rider-id-banner strong {
+      color: var(--text);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: -0.3px;
+      margin-left: 2px;
+    }
+
+    .history-section { margin-bottom: 16px; }
+    .history-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-align: center;
+      margin: 18px 0 20px;
+      letter-spacing: -0.2px;
+    }
+
+    .month-block { margin-bottom: 16px; }
+    .month-block:last-child { margin-bottom: 0; }
+    .month-block-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .month-block-title .amount-hl {
+      color: var(--primary-dark);
+    }
+
+    .day-list { display: flex; flex-direction: column; gap: 4px; }
+    .day-row {
+      font-size: 13px;
+      color: var(--text);
+      padding: 4px 0;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+    .day-row .day-date {
+      display: inline-block;
+      min-width: 60px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .day-row .day-shop { color: var(--text); }
+    .day-row .day-coupon {
+      display: block;
+      margin-left: 60px;
+      font-size: 12px;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+    .month-empty {
+      margin-left: 4px;
+      font-size: 12.5px;
+      color: var(--text-sub);
+      padding: 4px 0;
+    }
+
+    .history-note {
+      font-size: 11.5px;
+      color: var(--text-sub);
+      margin-top: 12px;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+
+    .coupons-section { margin-top: 32px; }
+    .coupons-section[hidden] { display: none; }
+    .coupons-count {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 10px;
+      letter-spacing: -0.2px;
+    }
+    .coupons-count strong {
+      color: var(--primary-dark);
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .my-coupon-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .my-coupon-card {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      background: white;
+      border: 1.5px solid #00AB78;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .my-coupon-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+      padding: 4px 0;
+      justify-content: center;
+    }
+    .my-coupon-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      word-break: keep-all;
+      line-height: 1.35;
+    }
+    .my-coupon-expiry {
+      font-size: 12px;
+      color: var(--text-sub);
+      letter-spacing: -0.2px;
+    }
+    .my-coupon-right {
+      flex: 0 0 38%;
+      min-width: 100px;
+      max-width: 140px;
+      display: flex;
+    }
+    .my-coupon-amount-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 6px;
+      border: 1.5px solid #00AB78;
+      border-radius: 10px;
+      background: #E6F7F2;
+      text-align: center;
+    }
+    .my-coupon-emoji { font-size: 24px; line-height: 1; }
+    .my-coupon-amount-text {
+      font-size: 17px;
+      font-weight: 800;
+      color: #00AB78;
+      letter-spacing: -0.4px;
+      white-space: nowrap;
+      line-height: 1.1;
+    }
+
+    .history-empty-all {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-sub);
+      font-size: 14px;
+      letter-spacing: -0.2px;
+      line-height: 1.6;
+    }
+
+    .modal-subtitle--tight { margin-top: -10px; }
+
+    /* ───── 단일 무료식사권 카드 ───── */
+    .single-coupon-card {
+      border: 1.5px solid var(--primary);
+      border-radius: 16px;
+      padding: 24px 18px;
+      text-align: center;
+      background: linear-gradient(180deg, #f0fbfb 0%, #ffffff 100%);
+    }
+    .single-coupon-emoji { font-size: 34px; line-height: 1; margin-bottom: 10px; }
+    .single-coupon-title1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      line-height: 1.4;
+    }
+    .single-coupon-title2 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-top: 6px;
+      letter-spacing: -0.2px;
+      line-height: 1.4;
+    }
+    .single-coupon-expiry {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      margin-top: 12px;
+      letter-spacing: -0.2px;
+    }
+    .single-coupon-status {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .single-coupon-status.is-unused { color: var(--primary-dark); }
+    .single-coupon-status.is-used { color: var(--text-sub); }
+
+    /* 사장님 사용 처리 버튼 */
+    .mark-used-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      font-family: inherit;
+      box-shadow: 0 3px 8px rgba(255, 107, 53, 0.4);
+    }
+    .mark-used-btn:active { background: #e85a28; transform: scale(0.98); }
+    .mark-used-btn:disabled { background: #f0a988; cursor: not-allowed; box-shadow: none; }
+    .mark-used-btn[hidden] { display: none; }
+    .mark-used-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-align: center;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+    .mark-used-hint[hidden] { display: none; }
+
+    /* ───── 배민라이더 확인 전체화면 ───── */
+    .verify-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: linear-gradient(160deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .verify-screen.open { opacity: 1; pointer-events: auto; }
+    .verify-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .verify-check {
+      width: 64px; height: 64px;
+      border: 3px solid rgba(255,255,255,0.9);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; font-weight: 800;
+      margin-bottom: 28px;
+    }
+    .verify-title {
+      font-size: 64px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 36px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+    .verify-msg {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: -0.3px;
+    }
+    .verify-thanks {
+      font-size: 18px;
+      font-weight: 500;
+      opacity: 0.92;
+      margin-top: 16px;
+      letter-spacing: -0.2px;
+    }
+    .verify-close {
+      width: 100%;
+      max-width: 420px;
+      height: 56px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+    }
+    .verify-close:active { background: rgba(255,255,255,0.3); transform: scale(0.99); }
+    @media (max-width: 380px) {
+      .verify-title { font-size: 52px; }
+      .verify-msg { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>[배민커넥트] 라이더 전용 식사 배-네핏</h1>
+      <p>점심피크 이후, 배달 활동에 든든한 힘이 되는 한 끼 혜택</p>
+      <div class="header-cta-stack">
+        <button class="header-cta header-cta--verify" id="riderVerifyBtn" type="button">🪪 배민라이더 확인</button>
+        <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🍚 무료식사권 사용</button>
+        <button class="header-cta" id="reviewOpenBtn" type="button">✏️ 이용후기</button>
+      </div>
+    </header>
+
+    <div class="guide-bar" id="guideBar">
+      <button class="guide-bar-toggle" id="guideToggle" aria-expanded="false" aria-controls="guideContent">
+        <span>📌 이용방법 보기</span>
+        <span class="guide-chevron">⌄</span>
+      </button>
+      <div class="guide-bar-content" id="guideContent">
+        <div class="guide-body">
+          <div class="section-title">[이용 방법]</div>
+          <ol>
+            <li>식당별 혜택 시간·메뉴·혜택 내용을 확인하세요</li>
+            <li>원하는 식당에 방문하세요</li>
+            <li>사장님께 본 페이지 우측 상단의 '배민라이더 확인' 버튼을 눌러 조회되는 화면을 보여주세요</li>
+            <li>혜택을 적용받고 주문하세요</li>
+          </ol>
+          <p class="closing">🍚 무료식사권이 있다면, '무료식사권 사용' 버튼을 눌러서 사장님께 보여드리고 이용하세요</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div class="status" id="status">
+        <div class="spinner"></div>
+        <span id="statusText">데이터 불러오는 중...</span>
+      </div>
+      <div class="count-pill" id="countPill" style="display:none;">
+        <b id="countNum">0</b>개 식당
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="guideModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="guideModalClose" aria-label="닫기">✕</button>
+      <div class="modal-title" id="guideModalTitle">📢 식사 배-네핏 이용 안내</div>
+      <div class="modal-body">
+        <div class="section-title">[이용방법]</div>
+        <ol>
+          <li>식당별 혜택 시간·메뉴·혜택 내용을 확인하세요</li>
+          <li>원하는 식당에 방문하세요</li>
+          <li>사장님께 본 페이지 우측 상단의 '배민라이더 확인' 버튼을 눌러 조회되는 화면을 보여주세요</li>
+          <li>혜택을 적용받고 주문하세요</li>
+        </ol>
+        <p class="closing">🎫 무료식사권이 있다면, '무료식사권 사용' 버튼을 눌러서 사장님께 보여드리고 이용하세요.</p>
+      </div>
+      <button class="modal-ok" id="guideModalOk">이해했어요</button>
+    </div>
+  </div>
+
+  <!-- ───── 라이더 후기 작성 모달 ───── -->
+  <div class="modal-backdrop" id="reviewModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="reviewModalClose" aria-label="닫기">✕</button>
+
+      <!-- 작성 화면 -->
+      <div id="reviewFormView">
+        <div class="modal-title" id="reviewModalTitle">💬 이용후기</div>
+        <div class="modal-subtitle">소중한 의견은 더 좋은 혜택을 만드는 데 사용됩니다</div>
+
+        <form id="reviewForm" novalidate>
+          <div class="form-field">
+            <label for="reviewRestaurant">방문하신 식당<span class="req">*</span></label>
+            <select id="reviewRestaurant" required>
+              <option value="">식당을 선택해주세요</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label>만족도<span class="req">*</span></label>
+            <div class="helper">1점(매우 불만족) ~ 5점(매우 만족)</div>
+            <div class="rating-group" id="ratingGroup" role="radiogroup" aria-label="만족도">
+              <button type="button" class="rating-btn" data-val="1" aria-label="1점">1</button>
+              <button type="button" class="rating-btn" data-val="2" aria-label="2점">2</button>
+              <button type="button" class="rating-btn" data-val="3" aria-label="3점">3</button>
+              <button type="button" class="rating-btn" data-val="4" aria-label="4점">4</button>
+              <button type="button" class="rating-btn" data-val="5" aria-label="5점">5</button>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="reviewText">자유 의견</label>
+            <textarea id="reviewText" maxlength="500" rows="4"
+              placeholder="사장님 응대, 매장 분위기, 메뉴 만족도 등 자유롭게 남겨주세요"></textarea>
+            <div class="char-count"><span id="reviewCharCount">0</span>/500</div>
+          </div>
+
+          <div class="form-error" id="reviewFormError" style="display:none;"></div>
+
+          <button type="submit" class="modal-ok" id="reviewSubmitBtn">후기 보내기</button>
+        </form>
+      </div>
+
+      <!-- 제출 완료 화면 -->
+      <div id="reviewSuccessView" class="success-view" style="display:none;">
+        <div class="success-icon">✓</div>
+        <div class="success-title">소중한 의견 감사합니다</div>
+        <div class="success-msg">더 좋은 혜택으로 보답할게요</div>
+        <button type="button" class="modal-ok" id="reviewSuccessOk">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── 내 혜택 보기 모달 ───── -->
+  <div class="modal-backdrop" id="historyModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="modal-card">
+      <button class="modal-close" id="historyModalClose" aria-label="닫기">✕</button>
+
+      <!-- Step 1: 입장 코드 입력 -->
+      <div id="historyStep1View">
+        <div class="modal-title" id="historyModalTitle">🍚 무료식사권 사용</div>
+        <p class="modal-subtitle modal-subtitle--tight">문자로 받으신 입장 코드 7자리를 입력해 주세요</p>
+        <div class="phone-example">⚠️ 무료식사권을 받으신 분만 조회할 수 있어요</div>
+        <input
+          type="text"
+          id="historyPhoneInput"
+          class="phone-input"
+          inputmode="text"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          maxlength="7"
+          placeholder="코드 7자리"
+          autocomplete="off"
+        />
+        <div id="historyStep1Error" class="form-error" hidden></div>
+        <button type="button" id="historyLookupBtn" class="modal-ok">조회하기</button>
+      </div>
+
+      <!-- Step 2: 결과 화면 -->
+      <div id="historyStep2View" hidden>
+        <button type="button" class="modal-back" id="historyBackBtn">← 뒤로 가기</button>
+        <div class="rider-id-banner">
+          입장 코드: <strong id="historyRiderNum">—</strong>
+        </div>
+
+        <div id="historyEmptyAll" class="history-empty-all" hidden>
+          혜택 대상자가 아니에요.<br>입장 코드를 다시 확인해 주세요.
+        </div>
+
+        <div id="historyDataView">
+          <div class="single-coupon-card">
+            <div class="single-coupon-emoji">🍚</div>
+            <div class="single-coupon-title1" id="couponTitle1">—</div>
+            <div class="single-coupon-title2" id="couponTitle2"></div>
+            <div class="single-coupon-expiry" id="couponExpiry"></div>
+            <div class="single-coupon-status" id="couponStatus"></div>
+          </div>
+          <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>🧾 사장님 사용 처리</button>
+          <p class="mark-used-hint" id="historyMarkUsedHint" hidden>사장님이 직접 눌러주세요. 한 번 누르면 되돌릴 수 없어요.</p>
+          <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="sheetClose" aria-label="닫기">✕</button>
+    <div class="sheet-content" id="sheetContent"></div>
+  </div>
+
+  <!-- ───── 배민라이더 확인 (전체화면) ───── -->
+  <div class="verify-screen" id="verifyScreen" role="dialog" aria-modal="true" aria-label="배민라이더 확인">
+    <div class="verify-inner">
+      <div class="verify-check" aria-hidden="true">✓</div>
+      <div class="verify-title">배민라이더</div>
+      <div class="verify-msg">사장님, 우리 가게 식사 혜택을<br>제공해 주세요.</div>
+      <div class="verify-thanks">감사합니다</div>
+    </div>
+    <button type="button" class="verify-close" id="verifyCloseBtn">닫기</button>
+  </div>
+
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=487ae20db913f56842d71ff49a7f522e&libraries=services&autoload=false"></script>
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1TQgr6MQ6nIP8loonIPWFzSh06f-9LfNQuAPRZSlQnYA/export?format=csv&gid=0';
+    const SONGPA_CENTER = { lat: 37.5145, lng: 127.1059 };
+
+    let map, geocoder;
+    let slideState = { items: [], idx: 0 };
+
+    // ---- CSV parser (handles quoted fields with commas/newlines) ----
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = '', inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+          else if (c === '"') inQuotes = false;
+          else field += c;
+        } else {
+          if (c === '"') inQuotes = true;
+          else if (c === ',') { row.push(field); field = ''; }
+          else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+          else if (c === '\r') { /* skip */ }
+          else field += c;
+        }
+      }
+      if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+      return rows;
+    }
+
+    function csvToObjects(rows) {
+      if (!rows.length) return [];
+      const header = rows[0].map(h => h.trim());
+      return rows.slice(1)
+        .filter(r => r.some(c => c && c.trim()))
+        .map(r => {
+          const o = {};
+          header.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+          return o;
+        });
+    }
+
+    // ---- Bootstrap ----
+    kakao.maps.load(async () => {
+      map = new kakao.maps.Map(document.getElementById('map'), {
+        center: new kakao.maps.LatLng(SONGPA_CENTER.lat, SONGPA_CENTER.lng),
+        level: 6
+      });
+      geocoder = new kakao.maps.services.Geocoder();
+
+      try {
+        setStatus('데이터 불러오는 중...', true);
+        console.log('[1] Fetching CSV from:', CSV_URL);
+        const res = await fetch(CSV_URL);
+        console.log('[2] CSV response — ok:', res.ok, 'status:', res.status);
+        if (!res.ok) throw new Error('CSV ' + res.status);
+        const text = await res.text();
+        console.log('[3] CSV raw (first 500 chars):\n' + text.slice(0, 500));
+
+        const rows = parseCSV(text);
+        console.log('[4] Parsed rows count:', rows.length);
+        console.log('[5] Header row:', rows[0]);
+
+        const data = csvToObjects(rows);
+        window.__restaurants = data;   // 후기 모달 드롭다운에서 재사용
+        console.log('[6] Data objects (' + data.length + ' restaurants):', data);
+        if (data.length > 0) {
+          console.log('[7] First row keys:', Object.keys(data[0]));
+          console.log('[8] First row 전체 주소 value:', JSON.stringify(data[0]['전체 주소']));
+        }
+
+        setStatus('지도에 표시 중...', true);
+        const placed = await placeMarkers(data);
+        console.log('[FINAL] Placed markers:', placed, '/', data.length);
+
+        hideStatus();
+        document.getElementById('countPill').style.display = 'block';
+        document.getElementById('countNum').textContent = placed;
+      } catch (e) {
+        console.error('[ERROR]', e);
+        setStatus('데이터를 불러오지 못했어요. ' + e.message, false);
+      }
+    });
+
+    function setStatus(text, spinning) {
+      const el = document.getElementById('status');
+      el.style.display = 'flex';
+      el.querySelector('.spinner').style.display = spinning ? 'block' : 'none';
+      document.getElementById('statusText').textContent = text;
+    }
+    function hideStatus() {
+      document.getElementById('status').style.display = 'none';
+    }
+
+    // ---- Marker placement (with sequential geocoding to avoid throttling) ----
+    function placeMarkers(data) {
+      return new Promise((resolve) => {
+        const bounds = new kakao.maps.LatLngBounds();
+        let placed = 0, i = 0;
+
+        function next() {
+          if (i >= data.length) {
+            if (placed > 0) map.setBounds(bounds);
+            return resolve(placed);
+          }
+          const r = data[i++];
+          const addr = r['전체 주소'];
+          const name = r['식당명'] || '(이름없음)';
+          if (!addr) {
+            console.warn('[geocode] SKIP (전체 주소 비어있음):', name, r);
+            return next();
+          }
+          console.log('[geocode] ' + i + '/' + data.length + ' →', name, '|', addr);
+
+          geocoder.addressSearch(addr, (result, status) => {
+            if (status === kakao.maps.services.Status.OK) {
+              console.log('  ✓ OK:', name, '→ lat', result[0].y, 'lng', result[0].x);
+              const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+              const marker = new kakao.maps.Marker({
+                map, position: coords, title: name
+              });
+              // 마커 위에 항상 보이는 식당명 라벨
+              new kakao.maps.CustomOverlay({
+                map,
+                position: coords,
+                content: '<div class="marker-label">' + esc(name) + '</div>',
+                yAnchor: 1,
+                xAnchor: 0.5,
+                clickable: false
+              });
+              kakao.maps.event.addListener(marker, 'click', () => openSheet(r));
+              bounds.extend(coords);
+              placed++;
+            } else {
+              console.warn('  ✗ FAIL:', name, '|', addr, '| status:', status);
+            }
+            next();
+          });
+        }
+        next();
+      });
+    }
+
+    // ---- Bottom sheet ----
+    function openSheet(r) {
+      const sheet = document.getElementById('sheet');
+      const backdrop = document.getElementById('backdrop');
+      const content = document.getElementById('sheetContent');
+
+      const images = ['매뉴 이미지1', '매뉴 이미지2', '매뉴 이미지3']
+        .map(k => r[k]).filter(s => s && s.trim());
+      slideState = { items: images, idx: 0 };
+
+      content.innerHTML = `
+        <div class="r-name">${esc(r['식당명'] || '')}</div>
+        <div class="r-loc">📍 ${esc(r['전체 주소'] || r['위치'] || '')}</div>
+
+        <div class="badge-row">
+          ${r['혜택 적용 시간'] ? `<span class="badge badge-time">⏰ ${esc(r['혜택 적용 시간'])}</span>` : ''}
+          ${r['라이더 혜택'] ? `<span class="badge badge-discount">🎁 ${esc(r['라이더 혜택'])}</span>` : ''}
+        </div>
+
+        ${images.length > 0 ? `
+          <div class="slider">
+            <img class="slider-img" id="sliderImg" src="${esc(images[0])}" alt="" onerror="this.style.opacity=0.3" />
+            ${images.length > 1 ? `
+              <button class="slider-arrow prev" id="sliderPrev" aria-label="이전">◀</button>
+              <button class="slider-arrow next" id="sliderNext" aria-label="다음">▶</button>
+              <div class="slider-dots" id="sliderDots">
+                ${images.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}"></span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        <div class="menu-block">
+          <div class="menu-label">혜택 메뉴</div>
+          <div class="menu-name">${esc(r['혜택 메뉴'] || '-')}</div>
+          ${r['가격'] ? `<div class="menu-price">${esc(r['가격'])}</div>` : ''}
+        </div>
+
+        ${r['안내'] ? `<div class="notice">📌 ${esc(r['안내'])}</div>` : ''}
+
+        ${r['지도 링크'] ? `<a class="naver-btn" href="${esc(r['지도 링크'])}" target="_blank" rel="noopener">네이버 지도에서 보기</a>` : ''}
+      `;
+
+      if (images.length > 1) {
+        document.getElementById('sliderPrev').addEventListener('click', () => slide(-1));
+        document.getElementById('sliderNext').addEventListener('click', () => slide(1));
+      }
+
+      sheet.classList.add('open');
+      backdrop.classList.add('open');
+    }
+
+    function slide(delta) {
+      const { items } = slideState;
+      if (!items.length) return;
+      slideState.idx = (slideState.idx + delta + items.length) % items.length;
+      const img = document.getElementById('sliderImg');
+      if (img) img.src = slideState.items[slideState.idx];
+      document.querySelectorAll('#sliderDots .dot').forEach((d, i) => {
+        d.classList.toggle('active', i === slideState.idx);
+      });
+    }
+
+    function closeSheet() {
+      document.getElementById('sheet').classList.remove('open');
+      document.getElementById('backdrop').classList.remove('open');
+    }
+    document.getElementById('sheetClose').addEventListener('click', closeSheet);
+    document.getElementById('backdrop').addEventListener('click', closeSheet);
+
+    // ---- 이용 안내: 첫 방문 모달 + 접이식 바 ----
+    (function initGuide() {
+      const KEY = 'beneft_guide_seen';
+      const backdrop = document.getElementById('guideModalBackdrop');
+      const bar = document.getElementById('guideBar');
+      const toggle = document.getElementById('guideToggle');
+
+      // 첫 방문이면 자동으로 모달 노출
+      let seen = false;
+      try { seen = !!localStorage.getItem(KEY); } catch (_) {}
+      if (!seen) {
+        requestAnimationFrame(() => backdrop.classList.add('open'));
+      }
+
+      function closeModal() {
+        backdrop.classList.remove('open');
+        try { localStorage.setItem(KEY, '1'); } catch (_) {}
+      }
+
+      document.getElementById('guideModalClose').addEventListener('click', closeModal);
+      document.getElementById('guideModalOk').addEventListener('click', closeModal);
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();   // 카드 내부 클릭은 무시
+      });
+
+      // 접이식 바 토글
+      toggle.addEventListener('click', () => {
+        const opened = bar.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', opened);
+      });
+    })();
+
+    // ---- 라이더 후기 작성 모달 ----
+    (function initReview() {
+      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykpP62-rEwejjzwvwOhTy-FXlVfr-N5PUaiSxC4GRhqwAdMgVFJEzLRPs4l1_NTd2mLA/exec';
+
+      const openBtn = document.getElementById('reviewOpenBtn');
+      const backdrop = document.getElementById('reviewModalBackdrop');
+      const closeBtn = document.getElementById('reviewModalClose');
+      const form = document.getElementById('reviewForm');
+      const submitBtn = document.getElementById('reviewSubmitBtn');
+      const ratingGroup = document.getElementById('ratingGroup');
+      const restaurantSel = document.getElementById('reviewRestaurant');
+      const reviewText = document.getElementById('reviewText');
+      const charCount = document.getElementById('reviewCharCount');
+      const formView = document.getElementById('reviewFormView');
+      const successView = document.getElementById('reviewSuccessView');
+      const successOk = document.getElementById('reviewSuccessOk');
+      const formError = document.getElementById('reviewFormError');
+
+      let selectedRating = null;
+
+      function populateRestaurants() {
+        // 첫 옵션(placeholder) 유지하고 나머지 제거
+        while (restaurantSel.options.length > 1) restaurantSel.remove(1);
+        const list = window.__restaurants || [];
+        if (list.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.disabled = true;
+          opt.textContent = '데이터 로딩 중… 잠시 후 다시 시도해주세요';
+          restaurantSel.appendChild(opt);
+          return;
+        }
+        list.forEach(r => {
+          const name = r['식당명'];
+          if (!name) return;
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          restaurantSel.appendChild(opt);
+        });
+      }
+
+      function showError(msg) {
+        formError.textContent = msg;
+        formError.style.display = 'block';
+      }
+      function hideError() { formError.style.display = 'none'; }
+
+      function openModal() {
+        populateRestaurants();
+        backdrop.classList.add('open');
+      }
+      function closeModal() { backdrop.classList.remove('open'); }
+
+      function resetToFormView() {
+        formView.style.display = '';
+        successView.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.textContent = '후기 보내기';
+        hideError();
+      }
+      function clearForm() {
+        restaurantSel.value = '';
+        selectedRating = null;
+        Array.from(ratingGroup.children).forEach(b => b.classList.remove('selected'));
+        reviewText.value = '';
+        charCount.textContent = '0';
+      }
+
+      openBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+      });
+
+      // 만족도 버튼
+      ratingGroup.addEventListener('click', (e) => {
+        const btn = e.target.closest('.rating-btn');
+        if (!btn) return;
+        selectedRating = btn.dataset.val;
+        Array.from(ratingGroup.children).forEach(x => {
+          x.classList.toggle('selected', x === btn);
+          x.setAttribute('aria-checked', x === btn);
+        });
+        hideError();
+      });
+
+      // 글자 수 카운트
+      reviewText.addEventListener('input', () => {
+        charCount.textContent = reviewText.value.length;
+      });
+
+      // 폼 제출
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        if (!restaurantSel.value || !selectedRating) {
+          showError('식당과 만족도를 선택해주세요');
+          return;
+        }
+
+        const payload = {
+          restaurant: restaurantSel.value,
+          rating: selectedRating,
+          review: reviewText.value.trim()
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '전송 중...';
+
+        try {
+          // 조회 API와 동일한 단순 요청 방식 → 응답(JSON)을 읽어 실제 저장 여부 확인
+          const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          const result = await res.json();
+          console.log('[review] response:', result);
+
+          // 백엔드 응답 형태가 둘 다 가능: { success:true } 또는 { result:'success' }
+          const ok = result && (result.success === true || result.result === 'success');
+          if (ok) {
+            formView.style.display = 'none';
+            successView.style.display = '';
+            clearForm();
+          } else {
+            showError((result && result.message) || '저장에 실패했어요. 잠시 후 다시 시도해주세요');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '후기 보내기';
+          }
+        } catch (err) {
+          console.error('[review] submit failed:', err);
+          showError('전송에 실패했어요. 잠시 후 다시 시도해주세요');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '후기 보내기';
+        }
+      });
+
+      // 성공 → 확인
+      successOk.addEventListener('click', () => {
+        closeModal();
+        setTimeout(resetToFormView, 300);   // 닫힘 트랜지션 후 폼 화면으로 복귀
+      });
+    })();
+
+    // ---- 내 혜택 보기 모달 ----
+    (function initMyHistory() {
+      const PARTNER_API_URL = 'https://script.google.com/macros/s/AKfycbxbcJQwoLnF4jAu_gL7xnJOJlJfyzznmd8ardaISniyV6pddX-M4UiYcDRSib1HF4sEnA/exec';
+
+      const openBtn = document.getElementById('historyOpenBtn');
+      const backdrop = document.getElementById('historyModalBackdrop');
+      const closeBtn = document.getElementById('historyModalClose');
+      const backBtn = document.getElementById('historyBackBtn');
+      const lookupBtn = document.getElementById('historyLookupBtn');
+      const phoneInput = document.getElementById('historyPhoneInput');
+      const errorDiv = document.getElementById('historyStep1Error');
+      const step1 = document.getElementById('historyStep1View');
+      const step2 = document.getElementById('historyStep2View');
+      const emptyAll = document.getElementById('historyEmptyAll');
+      const dataView = document.getElementById('historyDataView');
+      const markUsedBtn = document.getElementById('historyMarkUsedBtn');
+      const markUsedHint = document.getElementById('historyMarkUsedHint');
+      const markUsedError = document.getElementById('historyMarkUsedError');
+      let currentCode = '';
+
+      function openModal() {
+        showStep1();
+        backdrop.classList.add('open');
+        setTimeout(() => phoneInput.focus(), 100);
+      }
+      function closeModal() { backdrop.classList.remove('open'); }
+
+      function showStep1() {
+        step1.hidden = false;
+        step2.hidden = true;
+        phoneInput.value = '';
+        errorDiv.hidden = true;
+        errorDiv.textContent = '';
+        setLookupBtn(false);
+      }
+
+      function setLookupBtn(loading) {
+        if (loading) {
+          lookupBtn.disabled = true;
+          lookupBtn.textContent = '조회 중...';
+        } else {
+          lookupBtn.disabled = false;
+          lookupBtn.textContent = '조회하기';
+        }
+      }
+
+      // "2026-05-22 13:40" → "5월 22일"
+      function formatDayKor(dateString) {
+        if (!dateString) return '';
+        const m = String(dateString).match(/(\d{4})[-./]\s*(\d{1,2})[-./]\s*(\d{1,2})/);
+        if (m) return Number(m[2]) + '월 ' + Number(m[3]) + '일';
+        return String(dateString);
+      }
+
+      // 날짜 값(시트 텍스트 / JS Date 문자열 / ISO) → "2026-06-30" 형태로 통일 (시간 제거)
+      function formatDateYMD(value) {
+        if (!value) return '';
+        const s = String(value).trim();
+        // 이미 YYYY-MM-DD로 시작하면 앞 10자리만 사용
+        const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (iso) return iso[1] + '-' + iso[2] + '-' + iso[3];
+        // 그 외(예: "Tue Jun 30 2026 00:00:00 GMT+0900")는 Date로 파싱해 변환
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return y + '-' + m + '-' + day;
+        }
+        return s;
+      }
+
+      async function handleLookup() {
+        const code = phoneInput.value.trim();
+        // 입장 코드 7자리 (영문 대소문자·숫자, 대소문자 구분)
+        if (!/^[A-Za-z0-9]{7}$/.test(code)) {
+          errorDiv.textContent = '입장 코드 7자리를 입력해 주세요.';
+          errorDiv.hidden = false;
+          return;
+        }
+        errorDiv.hidden = true;
+        setLookupBtn(true);
+
+        try {
+          const res = await fetch(PARTNER_API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'getMyHistory', accessCode: code })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            renderMyHistory(data, code);
+          } else {
+            errorDiv.textContent = data.message || '조회에 실패했습니다.';
+            errorDiv.hidden = false;
+            setLookupBtn(false);
+          }
+        } catch (err) {
+          console.error('[benefit] lookup failed:', err);
+          errorDiv.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+          errorDiv.hidden = false;
+          setLookupBtn(false);
+        }
+      }
+
+      function renderMyHistory(data, code) {
+        const shownCode = data.accessCode || code || phoneInput.value.trim();
+        currentCode = shownCode;
+        document.getElementById('historyRiderNum').textContent = shownCode;
+
+        step1.hidden = true;
+        step2.hidden = false;
+
+        const benefit = data.benefit || null;
+
+        // 혜택 대상자가 아닌 경우 (코드 미등록)
+        if (!data.found || !benefit) {
+          emptyAll.hidden = false;
+          dataView.hidden = true;
+          return;
+        }
+
+        emptyAll.hidden = true;
+        dataView.hidden = false;
+        renderSingleCoupon(benefit);
+      }
+
+      function renderSingleCoupon(b) {
+        const title1 = document.getElementById('couponTitle1');
+        const title2 = document.getElementById('couponTitle2');
+        const expiry = document.getElementById('couponExpiry');
+        const status = document.getElementById('couponStatus');
+
+        title1.textContent = b.title1 || '무료식사권';
+
+        if (b.title2) {
+          title2.textContent = b.title2;
+          title2.style.display = '';
+        } else {
+          title2.style.display = 'none';
+        }
+
+        // 사용일시 값이 있으면 사용완료, 없으면 미사용
+        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
+
+        // 유효기간: 사용 완료된 건은 보여주지 않음 (미사용일 때만 노출)
+        if (b.validUntil && !usedAt) {
+          expiry.textContent = '유효기간: ' + formatDateYMD(b.validUntil);
+          expiry.style.display = '';
+        } else {
+          expiry.style.display = 'none';
+        }
+
+        markUsedError.hidden = true;
+        if (usedAt) {
+          status.textContent = '사용완료 · ' + formatDateYMD(usedAt);
+          status.className = 'single-coupon-status is-used';
+          // 이미 사용한 건은 사용 처리 버튼을 숨김
+          markUsedBtn.hidden = true;
+          markUsedHint.hidden = true;
+        } else {
+          status.textContent = '✅ 아직 사용하지 않았어요';
+          status.className = 'single-coupon-status is-unused';
+          // 미사용 → 사장님이 사용 처리할 수 있는 버튼 노출
+          markUsedBtn.hidden = false;
+          markUsedHint.hidden = false;
+          markUsedBtn.disabled = false;
+          markUsedBtn.textContent = '🧾 사장님 사용 처리';
+        }
+      }
+
+      // 사장님이 무료식사권을 사용 처리 (백엔드에 usedAt 기록)
+      async function handleMarkUsed() {
+        if (!currentCode) return;
+        if (!confirm('이 무료식사권을 사용 처리할까요?\n한 번 처리하면 되돌릴 수 없어요.')) return;
+
+        markUsedBtn.disabled = true;
+        markUsedBtn.textContent = '처리 중...';
+        markUsedError.hidden = true;
+
+        try {
+          const res = await fetch(PARTNER_API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'markUsed', accessCode: currentCode })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            // 백엔드가 갱신된 benefit(usedAt 포함)을 돌려주면 그대로, 아니면 사용처리 표시만
+            const benefit = data.benefit || {};
+            if (!benefit.usedAt) benefit.usedAt = data.usedAt || '사용완료';
+            renderSingleCoupon(benefit);
+          } else {
+            markUsedError.textContent = data.message || '사용 처리에 실패했어요. 잠시 후 다시 시도해 주세요.';
+            markUsedError.hidden = false;
+            markUsedBtn.disabled = false;
+            markUsedBtn.textContent = '🧾 사장님 사용 처리';
+          }
+        } catch (err) {
+          console.error('[benefit] markUsed failed:', err);
+          markUsedError.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+          markUsedError.hidden = false;
+          markUsedBtn.disabled = false;
+          markUsedBtn.textContent = '🧾 사장님 사용 처리';
+        }
+      }
+
+      // 이벤트 핸들러
+      openBtn.addEventListener('click', openModal);
+      closeBtn.addEventListener('click', closeModal);
+      backBtn.addEventListener('click', showStep1);
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+      });
+
+      phoneInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 7);
+        if (!errorDiv.hidden) errorDiv.hidden = true;
+      });
+      phoneInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleLookup();
+        }
+      });
+      lookupBtn.addEventListener('click', handleLookup);
+      markUsedBtn.addEventListener('click', handleMarkUsed);
+    })();
+
+    // ---- 배민라이더 확인 (전체화면) ----
+    (function initVerify() {
+      const screen = document.getElementById('verifyScreen');
+      const openBtn = document.getElementById('riderVerifyBtn');
+      const closeBtn = document.getElementById('verifyCloseBtn');
+      function open() { screen.classList.add('open'); }
+      function close() { screen.classList.remove('open'); }
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && screen.classList.contains('open')) close();
+      });
+    })();
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+  </script>
+</body>
+</html>
