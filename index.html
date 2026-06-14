@@ -415,20 +415,20 @@
       background: #fff;
       color: var(--primary-dark);
       border: 1px solid var(--border);
-      padding: 9px 13px;
+      padding: 8px 9px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       cursor: pointer;
       font-family: inherit;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
       white-space: nowrap;
     }
     .header-cta:active { transform: scale(0.97); }
     @media (max-width: 380px) {
       .header h1 { font-size: 16px; }
       .header p { font-size: 11px; }
-      .header-cta { padding: 8px 11px; font-size: 12.5px; }
+      .header-cta { padding: 7px 8px; font-size: 11.5px; }
     }
 
     /* ───── 후기 폼 ───── */
@@ -553,8 +553,8 @@
     .header-cta-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      padding: 10px 16px;
+      gap: 6px;
+      padding: 10px 12px;
       background: #fff;
       border-bottom: 1px solid var(--border);
     }
@@ -1481,7 +1481,6 @@
         submitBtn.textContent = '전송 중...';
 
         try {
-          // 조회 API와 동일한 단순 요청 방식 → 응답(JSON)을 읽어 실제 저장 여부 확인
           const res = await fetch(APPS_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify(payload)
@@ -1489,7 +1488,9 @@
           const result = await res.json();
           console.log('[review] response:', result);
 
-          if (result && result.success) {
+          // 스크립트는 { result: 'success' } 형태로 응답함
+          const ok = result && (result.result === 'success' || result.success === true);
+          if (ok) {
             formView.style.display = 'none';
             successView.style.display = '';
             clearForm();
