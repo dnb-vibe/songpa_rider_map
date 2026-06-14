@@ -865,6 +865,47 @@
     .single-coupon-status.is-unused { color: var(--primary-dark); }
     .single-coupon-status.is-used { color: var(--text-sub); }
 
+    /* 사장님 사용 처리 버튼 */
+    .mark-used-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      font-family: inherit;
+      box-shadow: 0 3px 8px rgba(255, 107, 53, 0.4);
+    }
+    .mark-used-btn:active { background: #e85a28; transform: scale(0.98); }
+    .mark-used-btn:disabled { background: #f0a988; cursor: not-allowed; box-shadow: none; }
+    .mark-used-btn[hidden] { display: none; }
+    .mark-used-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-align: center;
+      letter-spacing: -0.2px;
+      line-height: 1.5;
+    }
+    .mark-used-hint[hidden] { display: none; }
+
+    /* 버튼 안 로딩 스피너 (조회·사용처리·후기전송 공용) */
+    .btn-spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: -2px;
+      margin-right: 7px;
+    }
+
     /* ───── 배민라이더 확인 전체화면 ───── */
     .verify-screen {
       position: fixed;
@@ -1089,6 +1130,9 @@
             <div class="single-coupon-expiry" id="couponExpiry"></div>
             <div class="single-coupon-status" id="couponStatus"></div>
           </div>
+          <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>사장님 사용 처리</button>
+          <p class="mark-used-hint" id="historyMarkUsedHint" hidden>사장님이 직접 눌러주세요. 한 번 누르면 되돌릴 수 없어요.</p>
+          <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
         </div>
       </div>
     </div>
@@ -1445,7 +1489,7 @@
         };
 
         submitBtn.disabled = true;
-        submitBtn.textContent = '전송 중...';
+        submitBtn.innerHTML = '<span class="btn-spinner"></span>전송 중입니다...';
 
         try {
           const res = await fetch(APPS_SCRIPT_URL, {
@@ -1496,6 +1540,10 @@
       const step2 = document.getElementById('historyStep2View');
       const emptyAll = document.getElementById('historyEmptyAll');
       const dataView = document.getElementById('historyDataView');
+      const markUsedBtn = document.getElementById('historyMarkUsedBtn');
+      const markUsedHint = document.getElementById('historyMarkUsedHint');
+      const markUsedError = document.getElementById('historyMarkUsedError');
+      let currentCode = '';
 
       function openModal() {
         showStep1();
@@ -1516,7 +1564,7 @@
       function setLookupBtn(loading) {
         if (loading) {
           lookupBtn.disabled = true;
-          lookupBtn.textContent = '조회 중...';
+          lookupBtn.innerHTML = '<span class="btn-spinner"></span>조회 중입니다...';
         } else {
           lookupBtn.disabled = false;
           lookupBtn.textContent = '조회하기';
@@ -1584,6 +1632,7 @@
 
       function renderMyHistory(data, code) {
         const shownCode = data.accessCode || code || phoneInput.value.trim();
+        currentCode = shownCode;
         document.getElementById('historyRiderNum').textContent = shownCode;
 
         step1.hidden = true;
@@ -1618,21 +1667,68 @@
           title2.style.display = 'none';
         }
 
-        if (b.validUntil) {
+        // 사용일시 값이 있으면 사용완료, 없으면 미사용
+        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
+
+        // 유효기간: 사용 완료된 건은 숨김 (미사용일 때만 노출)
+        if (b.validUntil && !usedAt) {
           expiry.textContent = '유효기간: ' + formatDateYMD(b.validUntil);
           expiry.style.display = '';
         } else {
           expiry.style.display = 'none';
         }
 
-        // 사용일시 값이 있으면 사용완료, 없으면 미사용
-        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
+        markUsedError.hidden = true;
         if (usedAt) {
           status.textContent = '사용완료 · ' + formatDateYMD(usedAt);
           status.className = 'single-coupon-status is-used';
+          // 이미 사용한 건은 사용 처리 버튼 숨김
+          markUsedBtn.hidden = true;
+          markUsedHint.hidden = true;
         } else {
           status.textContent = '✅ 아직 사용하지 않았어요';
           status.className = 'single-coupon-status is-unused';
+          // 미사용 → 사장님이 사용 처리할 수 있는 버튼 노출
+          markUsedBtn.hidden = false;
+          markUsedHint.hidden = false;
+          markUsedBtn.disabled = false;
+          markUsedBtn.textContent = '사장님 사용 처리';
+        }
+      }
+
+      // 사장님이 무료식사권을 사용 처리 (백엔드에 usedAt 기록)
+      async function handleMarkUsed() {
+        if (!currentCode) return;
+        if (!confirm('이 무료식사권을 사용 처리할까요?\n한 번 처리하면 되돌릴 수 없어요.')) return;
+
+        markUsedBtn.disabled = true;
+        markUsedBtn.innerHTML = '<span class="btn-spinner"></span>처리 중입니다...';
+        markUsedError.hidden = true;
+
+        try {
+          const res = await fetch(PARTNER_API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'markUsed', accessCode: currentCode })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            // 백엔드가 갱신된 benefit(usedAt 포함)을 돌려주면 그대로, 아니면 사용처리 표시만
+            const benefit = data.benefit || {};
+            if (!benefit.usedAt) benefit.usedAt = data.usedAt || '사용완료';
+            renderSingleCoupon(benefit);
+          } else {
+            markUsedError.textContent = data.message || '사용 처리에 실패했어요. 잠시 후 다시 시도해 주세요.';
+            markUsedError.hidden = false;
+            markUsedBtn.disabled = false;
+            markUsedBtn.textContent = '사장님 사용 처리';
+          }
+        } catch (err) {
+          console.error('[benefit] markUsed failed:', err);
+          markUsedError.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
+          markUsedError.hidden = false;
+          markUsedBtn.disabled = false;
+          markUsedBtn.textContent = '사장님 사용 처리';
         }
       }
 
@@ -1655,6 +1751,7 @@
         }
       });
       lookupBtn.addEventListener('click', handleLookup);
+      markUsedBtn.addEventListener('click', handleMarkUsed);
     })();
 
     // ---- 배민라이더 확인 (전체화면) ----
