@@ -300,9 +300,15 @@
     }
     .guide-bar-toggle:active { background: #D6F2F0; }
     .guide-chevron {
-      font-size: 14px;
+      font-size: 22px;
+      line-height: 1;
       transition: transform 0.25s ease;
       display: inline-block;
+    }
+    .guide-hint {
+      font-size: 11px;
+      font-weight: 600;
+      opacity: 0.6;
     }
     .guide-bar.open .guide-chevron { transform: rotate(180deg); }
     .guide-bar-content {
@@ -403,31 +409,26 @@
     }
     .modal-ok:active { background: var(--primary-dark); }
 
-    /* ───── 헤더 우상단 CTA 버튼 ───── */
-    .header { position: relative; padding-right: 140px; }
+    /* ───── 헤더 CTA 버튼 ───── */
+    .header { position: relative; }
     .header-cta {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(255,255,255,0.95);
+      background: #fff;
       color: var(--primary-dark);
-      border: none;
-      padding: 10px 15px;
+      border: 1px solid var(--border);
+      padding: 9px 13px;
       border-radius: 999px;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
       font-family: inherit;
       letter-spacing: -0.2px;
       white-space: nowrap;
     }
-    .header-cta:active { background: white; transform: scale(0.97); }
+    .header-cta:active { transform: scale(0.97); }
     @media (max-width: 380px) {
-      .header { padding-right: 122px; }
       .header h1 { font-size: 16px; }
       .header p { font-size: 11px; }
-      .header-cta { padding: 8px 12px; font-size: 12.5px; }
+      .header-cta { padding: 8px 11px; font-size: 12.5px; }
     }
 
     /* ───── 후기 폼 ───── */
@@ -548,32 +549,25 @@
       margin-bottom: 22px;
     }
 
-    /* ───── 헤더 우상단 CTA 스택 (내 혜택 보기 + 후기 남기기) ───── */
-    .header-cta-stack {
-      position: absolute;
-      top: 12px;
-      right: 14px;
+    /* ───── 헤더 아래 CTA 바 (가로 배치) ───── */
+    .header-cta-bar {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-end;
-      z-index: 5;
-    }
-    .header-cta-stack .header-cta {
-      position: static;
-      top: auto;
-      right: auto;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
     }
     .header-cta--mint {
       background: var(--primary);
       color: white;
-      box-shadow: 0 2px 8px rgba(42, 193, 188, 0.4);
+      border-color: var(--primary);
     }
     .header-cta--mint:active { background: var(--primary-dark); transform: scale(0.97); }
-.header-cta--verify {
+    .header-cta--verify {
       background: #2C3E50;
       color: white;
-      box-shadow: 0 3px 8px rgba(44, 62, 80, 0.35);
+      border-color: #2C3E50;
     }
     .header-cta--verify:active { background: #1f2d3a; transform: scale(0.97); }
     /* ───── 내 혜택 보기 모달 ───── */
@@ -809,6 +803,21 @@
 
     .modal-subtitle--tight { margin-top: -10px; }
 
+    /* ───── 입력 화면 [이용방법] 박스 ───── */
+    .usage-guide {
+      background: #F4FBFB;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .usage-title { font-size: 13px; font-weight: 800; color: var(--primary-dark); margin-bottom: 8px; }
+    .usage-list { margin: 0; padding-left: 20px; }
+    .usage-list li { font-size: 13.5px; color: var(--text); line-height: 1.6; letter-spacing: -0.2px; margin-bottom: 8px; }
+    .usage-list li:last-child { margin-bottom: 0; }
+    .usage-sub { display: block; font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+
     /* ───── 단일 무료식사권 카드 ───── */
     .single-coupon-card {
       border: 1.5px solid var(--primary);
@@ -849,35 +858,6 @@
     }
     .single-coupon-status.is-unused { color: var(--primary-dark); }
     .single-coupon-status.is-used { color: var(--text-sub); }
-
-    /* 사장님 사용 처리 버튼 */
-    .mark-used-btn {
-      width: 100%;
-      margin-top: 18px;
-      padding: 15px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      letter-spacing: -0.2px;
-      font-family: inherit;
-      box-shadow: 0 3px 8px rgba(255, 107, 53, 0.4);
-    }
-    .mark-used-btn:active { background: #e85a28; transform: scale(0.98); }
-    .mark-used-btn:disabled { background: #f0a988; cursor: not-allowed; box-shadow: none; }
-    .mark-used-btn[hidden] { display: none; }
-    .mark-used-hint {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--text-sub);
-      text-align: center;
-      letter-spacing: -0.2px;
-      line-height: 1.5;
-    }
-    .mark-used-hint[hidden] { display: none; }
 
     /* ───── 배민라이더 확인 전체화면 ───── */
     .verify-screen {
@@ -957,30 +937,31 @@
 <body>
   <div class="app">
     <header class="header">
-      <h1>[배민커넥트] 라이더 전용 식사 배-네핏</h1>
+      <h1>[배민커넥트] 라이더 전용 식사 배-네핏 🍚</h1>
       <p>점심피크 이후, 배달 활동에 든든한 힘이 되는 한 끼 혜택</p>
-      <div class="header-cta-stack">
-        <button class="header-cta header-cta--verify" id="riderVerifyBtn" type="button">🪪 배민라이더 확인</button>
-        <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🍚 무료식사권 사용</button>
-        <button class="header-cta" id="reviewOpenBtn" type="button">✏️ 이용후기</button>
-      </div>
     </header>
+
+    <div class="header-cta-bar">
+      <button class="header-cta header-cta--verify" id="riderVerifyBtn" type="button">🪪 배민라이더 확인</button>
+      <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🎁 무료식사권 사용</button>
+      <button class="header-cta" id="reviewOpenBtn" type="button">✏️ 이용후기</button>
+    </div>
 
     <div class="guide-bar" id="guideBar">
       <button class="guide-bar-toggle" id="guideToggle" aria-expanded="false" aria-controls="guideContent">
-        <span>📌 이용방법 보기</span>
+        <span>📌 이용방법 보기 <span class="guide-hint">(눌러서 펼치기)</span></span>
         <span class="guide-chevron">⌄</span>
       </button>
       <div class="guide-bar-content" id="guideContent">
         <div class="guide-body">
-          <div class="section-title">[이용 방법]</div>
+          <div class="section-title">[이용방법]</div>
           <ol>
-            <li>식당별 혜택 시간·메뉴·혜택 내용을 확인하세요</li>
+            <li>식당별 혜택 시간·메뉴·내용을 확인하세요</li>
             <li>원하는 식당에 방문하세요</li>
-            <li>사장님께 본 페이지 우측 상단의 '배민라이더 확인' 버튼을 눌러 조회되는 화면을 보여주세요</li>
-            <li>혜택을 적용받고 주문하세요</li>
+            <li>상단 '배민라이더 확인' 버튼을 눌러, 나오는 화면을 사장님께 보여주세요</li>
+            <li>혜택을 적용받아 주문하세요</li>
           </ol>
-          <p class="closing">🍚 무료식사권이 있다면, '무료식사권 사용' 버튼을 눌러서 사장님께 보여드리고 이용하세요</p>
+          <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요</p>
         </div>
       </div>
     </div>
@@ -1004,12 +985,12 @@
       <div class="modal-body">
         <div class="section-title">[이용방법]</div>
         <ol>
-          <li>식당별 혜택 시간·메뉴·혜택 내용을 확인하세요</li>
+          <li>식당별 혜택 시간·메뉴·내용을 확인하세요</li>
           <li>원하는 식당에 방문하세요</li>
-          <li>사장님께 본 페이지 우측 상단의 '배민라이더 확인' 버튼을 눌러 조회되는 화면을 보여주세요</li>
-          <li>혜택을 적용받고 주문하세요</li>
+          <li>상단 '배민라이더 확인' 버튼을 눌러, 나오는 화면을 사장님께 보여주세요</li>
+          <li>혜택을 적용받아 주문하세요</li>
         </ol>
-        <p class="closing">🎫 무료식사권이 있다면, '무료식사권 사용' 버튼을 눌러서 사장님께 보여드리고 이용하세요.</p>
+        <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요</p>
       </div>
       <button class="modal-ok" id="guideModalOk">이해했어요</button>
     </div>
@@ -1022,7 +1003,7 @@
 
       <!-- 작성 화면 -->
       <div id="reviewFormView">
-        <div class="modal-title" id="reviewModalTitle">💬 이용후기</div>
+        <div class="modal-title" id="reviewModalTitle">✏️ 이용후기</div>
         <div class="modal-subtitle">소중한 의견은 더 좋은 혜택을 만드는 데 사용됩니다</div>
 
         <form id="reviewForm" novalidate>
@@ -1073,11 +1054,18 @@
     <div class="modal-card">
       <button class="modal-close" id="historyModalClose" aria-label="닫기">✕</button>
 
-      <!-- Step 1: 입장 코드 입력 -->
+      <!-- Step 1: 쿠폰코드 입력 -->
       <div id="historyStep1View">
-        <div class="modal-title" id="historyModalTitle">🍚 무료식사권 사용</div>
-        <p class="modal-subtitle modal-subtitle--tight">문자로 받으신 입장 코드 7자리를 입력해 주세요</p>
-        <div class="phone-example">⚠️ 무료식사권을 받으신 분만 조회할 수 있어요</div>
+        <div class="modal-title" id="historyModalTitle">🎁 무료식사권 사용</div>
+        <div class="usage-guide">
+          <div class="usage-title">[이용방법]</div>
+          <ol class="usage-list">
+            <li>문자로 받으신 쿠폰코드 7자리를 입력해 주세요.
+              <span class="usage-sub">· 무료식사권을 받으신 분만 조회할 수 있어요</span>
+            </li>
+            <li>사용 가능한 식사권이 조회되면, 사장님께 보여드리고 이용하세요.</li>
+          </ol>
+        </div>
         <input
           type="text"
           id="historyPhoneInput"
@@ -1087,7 +1075,7 @@
           autocorrect="off"
           spellcheck="false"
           maxlength="7"
-          placeholder="코드 7자리"
+          placeholder="쿠폰코드 7자리"
           autocomplete="off"
         />
         <div id="historyStep1Error" class="form-error" hidden></div>
@@ -1098,24 +1086,21 @@
       <div id="historyStep2View" hidden>
         <button type="button" class="modal-back" id="historyBackBtn">← 뒤로 가기</button>
         <div class="rider-id-banner">
-          입장 코드: <strong id="historyRiderNum">—</strong>
+          쿠폰코드: <strong id="historyRiderNum">—</strong>
         </div>
 
         <div id="historyEmptyAll" class="history-empty-all" hidden>
-          혜택 대상자가 아니에요.<br>입장 코드를 다시 확인해 주세요.
+          혜택 대상자가 아니에요.<br>쿠폰코드를 다시 확인해 주세요.
         </div>
 
         <div id="historyDataView">
           <div class="single-coupon-card">
-            <div class="single-coupon-emoji">🍚</div>
+            <div class="single-coupon-emoji">🎁</div>
             <div class="single-coupon-title1" id="couponTitle1">—</div>
             <div class="single-coupon-title2" id="couponTitle2"></div>
             <div class="single-coupon-expiry" id="couponExpiry"></div>
             <div class="single-coupon-status" id="couponStatus"></div>
           </div>
-          <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>🧾 사장님 사용 처리</button>
-          <p class="mark-used-hint" id="historyMarkUsedHint" hidden>사장님이 직접 눌러주세요. 한 번 누르면 되돌릴 수 없어요.</p>
-          <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
         </div>
       </div>
     </div>
@@ -1504,9 +1489,7 @@
           const result = await res.json();
           console.log('[review] response:', result);
 
-          // 백엔드 응답 형태가 둘 다 가능: { success:true } 또는 { result:'success' }
-          const ok = result && (result.success === true || result.result === 'success');
-          if (ok) {
+          if (result && result.success) {
             formView.style.display = 'none';
             successView.style.display = '';
             clearForm();
@@ -1532,7 +1515,7 @@
 
     // ---- 내 혜택 보기 모달 ----
     (function initMyHistory() {
-      const PARTNER_API_URL = 'https://script.google.com/macros/s/AKfycbxbcJQwoLnF4jAu_gL7xnJOJlJfyzznmd8ardaISniyV6pddX-M4UiYcDRSib1HF4sEnA/exec';
+      const PARTNER_API_URL = 'https://script.google.com/macros/s/AKfycbyIylK7fWGbmSmg-Gx79lb2e8ifdOBq0pG2e-fjGrwENmKMhI73Jx_A4VoKhgRfe6QAqg/exec';
 
       const openBtn = document.getElementById('historyOpenBtn');
       const backdrop = document.getElementById('historyModalBackdrop');
@@ -1545,10 +1528,6 @@
       const step2 = document.getElementById('historyStep2View');
       const emptyAll = document.getElementById('historyEmptyAll');
       const dataView = document.getElementById('historyDataView');
-      const markUsedBtn = document.getElementById('historyMarkUsedBtn');
-      const markUsedHint = document.getElementById('historyMarkUsedHint');
-      const markUsedError = document.getElementById('historyMarkUsedError');
-      let currentCode = '';
 
       function openModal() {
         showStep1();
@@ -1604,9 +1583,9 @@
 
       async function handleLookup() {
         const code = phoneInput.value.trim();
-        // 입장 코드 7자리 (영문 대소문자·숫자, 대소문자 구분)
+        // 쿠폰코드 7자리 (영문 대소문자·숫자)
         if (!/^[A-Za-z0-9]{7}$/.test(code)) {
-          errorDiv.textContent = '입장 코드 7자리를 입력해 주세요.';
+          errorDiv.textContent = '쿠폰코드 7자리를 입력해 주세요.';
           errorDiv.hidden = false;
           return;
         }
@@ -1637,7 +1616,6 @@
 
       function renderMyHistory(data, code) {
         const shownCode = data.accessCode || code || phoneInput.value.trim();
-        currentCode = shownCode;
         document.getElementById('historyRiderNum').textContent = shownCode;
 
         step1.hidden = true;
@@ -1672,68 +1650,21 @@
           title2.style.display = 'none';
         }
 
-        // 사용일시 값이 있으면 사용완료, 없으면 미사용
-        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
-
-        // 유효기간: 사용 완료된 건은 보여주지 않음 (미사용일 때만 노출)
-        if (b.validUntil && !usedAt) {
+        if (b.validUntil) {
           expiry.textContent = '유효기간: ' + formatDateYMD(b.validUntil);
           expiry.style.display = '';
         } else {
           expiry.style.display = 'none';
         }
 
-        markUsedError.hidden = true;
+        // 사용일시 값이 있으면 사용완료, 없으면 미사용
+        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
         if (usedAt) {
           status.textContent = '사용완료 · ' + formatDateYMD(usedAt);
           status.className = 'single-coupon-status is-used';
-          // 이미 사용한 건은 사용 처리 버튼을 숨김
-          markUsedBtn.hidden = true;
-          markUsedHint.hidden = true;
         } else {
           status.textContent = '✅ 아직 사용하지 않았어요';
           status.className = 'single-coupon-status is-unused';
-          // 미사용 → 사장님이 사용 처리할 수 있는 버튼 노출
-          markUsedBtn.hidden = false;
-          markUsedHint.hidden = false;
-          markUsedBtn.disabled = false;
-          markUsedBtn.textContent = '🧾 사장님 사용 처리';
-        }
-      }
-
-      // 사장님이 무료식사권을 사용 처리 (백엔드에 usedAt 기록)
-      async function handleMarkUsed() {
-        if (!currentCode) return;
-        if (!confirm('이 무료식사권을 사용 처리할까요?\n한 번 처리하면 되돌릴 수 없어요.')) return;
-
-        markUsedBtn.disabled = true;
-        markUsedBtn.textContent = '처리 중...';
-        markUsedError.hidden = true;
-
-        try {
-          const res = await fetch(PARTNER_API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'markUsed', accessCode: currentCode })
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            // 백엔드가 갱신된 benefit(usedAt 포함)을 돌려주면 그대로, 아니면 사용처리 표시만
-            const benefit = data.benefit || {};
-            if (!benefit.usedAt) benefit.usedAt = data.usedAt || '사용완료';
-            renderSingleCoupon(benefit);
-          } else {
-            markUsedError.textContent = data.message || '사용 처리에 실패했어요. 잠시 후 다시 시도해 주세요.';
-            markUsedError.hidden = false;
-            markUsedBtn.disabled = false;
-            markUsedBtn.textContent = '🧾 사장님 사용 처리';
-          }
-        } catch (err) {
-          console.error('[benefit] markUsed failed:', err);
-          markUsedError.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
-          markUsedError.hidden = false;
-          markUsedBtn.disabled = false;
-          markUsedBtn.textContent = '🧾 사장님 사용 처리';
         }
       }
 
@@ -1756,7 +1687,6 @@
         }
       });
       lookupBtn.addEventListener('click', handleLookup);
-      markUsedBtn.addEventListener('click', handleMarkUsed);
     })();
 
     // ---- 배민라이더 확인 (전체화면) ----
