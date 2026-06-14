@@ -956,12 +956,12 @@
         <div class="guide-body">
           <div class="section-title">[이용방법]</div>
           <ol>
-            <li>식당별 혜택 시간·메뉴·내용을 확인하세요</li>
-            <li>원하는 식당에 방문하세요</li>
-            <li>상단 '배민라이더 확인' 버튼을 눌러, 나오는 화면을 사장님께 보여주세요</li>
-            <li>혜택을 적용받아 주문하세요</li>
+            <li>식당별 혜택 시간·메뉴·내용을 확인하세요.</li>
+            <li>원하는 식당에 방문하세요.</li>
+            <li>'배민라이더 확인' 버튼을 눌러, 나오는 화면을 사장님께 보여주세요.</li>
+            <li>혜택을 적용받아 주문하세요.</li>
           </ol>
-          <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요</p>
+          <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요.</p>
         </div>
       </div>
     </div>
@@ -975,24 +975,6 @@
       <div class="count-pill" id="countPill" style="display:none;">
         <b id="countNum">0</b>개 식당
       </div>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="guideModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="guideModalTitle">
-    <div class="modal-card">
-      <button class="modal-close" id="guideModalClose" aria-label="닫기">✕</button>
-      <div class="modal-title" id="guideModalTitle">📢 식사 배-네핏 이용 안내</div>
-      <div class="modal-body">
-        <div class="section-title">[이용방법]</div>
-        <ol>
-          <li>식당별 혜택 시간·메뉴·내용을 확인하세요</li>
-          <li>원하는 식당에 방문하세요</li>
-          <li>상단 '배민라이더 확인' 버튼을 눌러, 나오는 화면을 사장님께 보여주세요</li>
-          <li>혜택을 적용받아 주문하세요</li>
-        </ol>
-        <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요</p>
-      </div>
-      <button class="modal-ok" id="guideModalOk">이해했어요</button>
     </div>
   </div>
 
@@ -1337,32 +1319,11 @@
     document.getElementById('sheetClose').addEventListener('click', closeSheet);
     document.getElementById('backdrop').addEventListener('click', closeSheet);
 
-    // ---- 이용 안내: 첫 방문 모달 + 접이식 바 ----
+    // ---- 이용 안내: 접이식 바 ----
     (function initGuide() {
-      const KEY = 'beneft_guide_seen';
-      const backdrop = document.getElementById('guideModalBackdrop');
       const bar = document.getElementById('guideBar');
       const toggle = document.getElementById('guideToggle');
 
-      // 첫 방문이면 자동으로 모달 노출
-      let seen = false;
-      try { seen = !!localStorage.getItem(KEY); } catch (_) {}
-      if (!seen) {
-        requestAnimationFrame(() => backdrop.classList.add('open'));
-      }
-
-      function closeModal() {
-        backdrop.classList.remove('open');
-        try { localStorage.setItem(KEY, '1'); } catch (_) {}
-      }
-
-      document.getElementById('guideModalClose').addEventListener('click', closeModal);
-      document.getElementById('guideModalOk').addEventListener('click', closeModal);
-      backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) closeModal();   // 카드 내부 클릭은 무시
-      });
-
-      // 접이식 바 토글
       toggle.addEventListener('click', () => {
         const opened = bar.classList.toggle('open');
         toggle.setAttribute('aria-expanded', opened);
