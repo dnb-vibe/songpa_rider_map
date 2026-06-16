@@ -989,8 +989,7 @@
     </header>
 
     <div class="header-cta-bar">
-      <button class="header-cta header-cta--verify" id="riderVerifyBtn" type="button">🪪 배민라이더 확인</button>
-      <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🎁 무료식사권 사용</button>
+      <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🎁 식사 혜택 이용하기</button>
       <button class="header-cta" id="reviewOpenBtn" type="button">✏️ 이용후기</button>
     </div>
 
@@ -1003,12 +1002,12 @@
         <div class="guide-body">
           <div class="section-title">[이용방법]</div>
           <ol>
-            <li>식당별 혜택 시간·메뉴·내용을 확인하세요.</li>
-            <li>원하는 식당에 방문하세요.</li>
-            <li>'배민라이더 확인' 버튼을 눌러, 화면을 사장님께 보여주세요.</li>
-            <li>혜택을 적용받아 주문하세요.</li>
+            <li>지도에서 식당별 혜택 시간·메뉴·내용을 확인하세요.</li>
+            <li>'식사 혜택 이용하기'를 눌러 방문할 식당을 선택하세요.</li>
+            <li>문자로 받은 쿠폰코드를 입력하면 혜택 대상자 화면이 떠요.</li>
+            <li>사장님이 '사용 처리'를 누르면 혜택을 받을 수 있어요.</li>
           </ol>
-          <p class="closing">🎁 무료식사권이 있다면 쿠폰코드 입력 후 사용하세요.</p>
+          <p class="closing">🎁 쿠폰코드는 하루에 음식점 1회·카페 1회 사용할 수 있어요.</p>
         </div>
       </div>
     </div>
@@ -1078,40 +1077,37 @@
     </div>
   </div>
 
-  <!-- ───── 내 혜택 보기 모달 ───── -->
+  <!-- ───── 식사 혜택 이용하기 모달 ───── -->
   <div class="modal-backdrop" id="historyModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
     <div class="modal-card">
       <button class="modal-close" id="historyModalClose" aria-label="닫기">✕</button>
 
-      <!-- Step 1: 쿠폰코드 입력 -->
+      <!-- Step 1: 식당 선택 + 쿠폰코드 -->
       <div id="historyStep1View">
-        <div class="modal-title" id="historyModalTitle">🎁 무료식사권 사용</div>
+        <div class="modal-title" id="historyModalTitle">🎁 식사 혜택 이용하기</div>
         <div class="usage-guide">
           <div class="usage-title">[이용방법]</div>
           <ol class="usage-list">
-            <li>문자로 받으신 쿠폰코드 7자리를 입력해 주세요.
-              <span class="usage-sub">· 무료식사권을 받으신 분만 조회할 수 있어요</span>
+            <li>방문하신 식당을 선택해 주세요.</li>
+            <li>문자로 받으신 쿠폰코드를 입력해 주세요.
+              <span class="usage-sub">· 쿠폰코드는 하루에 음식점 1회·카페 1회 사용할 수 있어요</span>
             </li>
-            <li>사용 가능한 식사권이 조회되면, 사장님께 보여드리고 이용하세요.</li>
           </ol>
         </div>
-        <input
-          type="text"
-          id="historyPhoneInput"
-          class="phone-input"
-          inputmode="text"
-          autocapitalize="none"
-          autocorrect="off"
-          spellcheck="false"
-          maxlength="7"
-          placeholder="쿠폰코드 7자리"
-          autocomplete="off"
-        />
+        <div class="form-field">
+          <label for="useRestaurant">방문하신 식당<span class="req">*</span></label>
+          <select id="useRestaurant" required>
+            <option value="">식당을 선택해주세요</option>
+          </select>
+        </div>
+        <input type="text" id="historyPhoneInput" class="phone-input" inputmode="text"
+          autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="7"
+          placeholder="쿠폰코드 입력" autocomplete="off" />
         <div id="historyStep1Error" class="form-error" hidden></div>
-        <button type="button" id="historyLookupBtn" class="modal-ok">조회하기</button>
+        <button type="button" id="historyLookupBtn" class="modal-ok">확인하기</button>
       </div>
 
-      <!-- Step 2: 결과 화면 -->
+      <!-- Step 2: 결과 -->
       <div id="historyStep2View" hidden>
         <button type="button" class="modal-back" id="historyBackBtn">← 뒤로 가기</button>
         <div class="rider-id-banner">
@@ -1122,16 +1118,16 @@
           혜택 대상자가 아니에요.<br>쿠폰코드를 다시 확인해 주세요.
         </div>
 
-        <div id="historyDataView">
+        <div id="historyDataView" hidden>
           <div class="single-coupon-card">
             <div class="single-coupon-emoji">🎁</div>
-            <div class="single-coupon-title1" id="couponTitle1">—</div>
+            <div class="single-coupon-title1" id="couponTitle1">혜택 제공 대상자입니다</div>
             <div class="single-coupon-title2" id="couponTitle2"></div>
             <div class="single-coupon-expiry" id="couponExpiry"></div>
             <div class="single-coupon-status" id="couponStatus"></div>
           </div>
           <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>사장님 사용 처리</button>
-          <p class="mark-used-hint" id="historyMarkUsedHint" hidden>사장님이 직접 눌러주세요. 한 번 누르면 되돌릴 수 없어요.</p>
+          <p class="mark-used-hint" id="historyMarkUsedHint" hidden style="color:#d33;font-weight:600;line-height:1.5;">⚠️ 실제 이용하시는 경우에만 사장님이 직접 '사용 처리'를 눌러주세요.<br>실수로 누르면 사용 가능 건수에서 차감되며 되돌릴 수 없어요.</p>
           <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
         </div>
       </div>
@@ -1158,7 +1154,7 @@
 
   <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=487ae20db913f56842d71ff49a7f522e&libraries=services&autoload=false"></script>
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/1TQgr6MQ6nIP8loonIPWFzSh06f-9LfNQuAPRZSlQnYA/export?format=csv&gid=0';
+    const NEW_EXEC_URL = 'https://script.google.com/macros/s/AKfycbwk1lFrTnHHpAu69c44iCoEngc0XCpqct5AgNz9lgWu6Dg6AqDsvKzOaoItpZ1xxKFCCQ/exec';  // 새 스크립트 /exec 주소
     const SONGPA_CENTER = { lat: 37.5145, lng: 127.1059 };
 
     let map, geocoder;
@@ -1208,28 +1204,13 @@
 
       try {
         setStatus('데이터 불러오는 중...', true);
-        console.log('[1] Fetching CSV from:', CSV_URL);
-        const res = await fetch(CSV_URL);
-        console.log('[2] CSV response — ok:', res.ok, 'status:', res.status);
-        if (!res.ok) throw new Error('CSV ' + res.status);
-        const text = await res.text();
-        console.log('[3] CSV raw (first 500 chars):\n' + text.slice(0, 500));
-
-        const rows = parseCSV(text);
-        console.log('[4] Parsed rows count:', rows.length);
-        console.log('[5] Header row:', rows[0]);
-
-        const data = csvToObjects(rows);
-        window.__restaurants = data;   // 후기 모달 드롭다운에서 재사용
-        console.log('[6] Data objects (' + data.length + ' restaurants):', data);
-        if (data.length > 0) {
-          console.log('[7] First row keys:', Object.keys(data[0]));
-          console.log('[8] First row 전체 주소 value:', JSON.stringify(data[0]['전체 주소']));
-        }
+        const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'getStores' }) });
+        const out = await res.json();
+        const data = (out && out.stores) ? out.stores : [];
+        window.__restaurants = data;
 
         setStatus('지도에 표시 중...', true);
         const placed = await placeMarkers(data);
-        console.log('[FINAL] Placed markers:', placed, '/', data.length);
 
         hideStatus();
         document.getElementById('countPill').style.display = 'block';
@@ -1305,53 +1286,40 @@
       const backdrop = document.getElementById('backdrop');
       const content = document.getElementById('sheetContent');
 
-      const images = ['매뉴 이미지1', '매뉴 이미지2', '매뉴 이미지3']
-        .map(k => r[k]).filter(s => s && s.trim());
-      slideState = { items: images, idx: 0 };
+      const name = r['식당명'] || '';
+      const remain = (r['잔여건수'] === 0 || r['잔여건수']) ? r['잔여건수'] : null;
+      const total = r['총 쿠폰수'];
 
       content.innerHTML = `
-        <div class="r-name">${esc(r['식당명'] || '')}</div>
+        <div class="r-name">${esc(name)}</div>
         <div class="r-loc">📍 ${esc(r['전체 주소'] || r['위치'] || '')}</div>
 
         <div class="badge-row">
           ${r['혜택 적용 시간'] ? `<span class="badge badge-time">⏰ ${esc(r['혜택 적용 시간'])}</span>` : ''}
           ${r['라이더 혜택'] ? `<span class="badge badge-discount">🎁 ${esc(r['라이더 혜택'])}</span>` : ''}
+          ${remain != null ? `<span class="badge badge-time">🎫 잔여 ${esc(remain)}${total ? ' / ' + esc(total) : ''}</span>` : (r['사용건수'] != null ? `<span class="badge badge-time">🎫 누적 ${esc(r['사용건수'])}건 사용</span>` : '')}
         </div>
-
-        ${images.length > 0 ? `
-          <div class="slider">
-            <img class="slider-img" id="sliderImg" src="${esc(images[0])}" alt="" onerror="this.style.opacity=0.3" />
-            ${images.length > 1 ? `
-              <button class="slider-arrow prev" id="sliderPrev" aria-label="이전">◀</button>
-              <button class="slider-arrow next" id="sliderNext" aria-label="다음">▶</button>
-              <div class="slider-dots" id="sliderDots">
-                ${images.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}"></span>`).join('')}
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
 
         <div class="menu-block">
-          <div class="menu-label">혜택 메뉴</div>
-          <div class="menu-name">${esc(r['혜택 메뉴'] || '-')}</div>
-          ${r['가격'] ? `<div class="menu-price">${esc(r['가격'])}</div>` : ''}
+          <div class="menu-label">대표 메뉴</div>
+          <div class="menu-name">${esc(r['대표 메뉴'] || '-')}</div>
         </div>
 
-        ${r['안내'] ? `<div class="notice">📌 ${esc(r['안내'])}</div>` : ''}
-
-        ${r['지도 링크'] ? `<a class="naver-btn" href="${esc(r['지도 링크'])}" target="_blank" rel="noopener">네이버 지도에서 보기</a>` : ''}
+        <button type="button" class="naver-btn" id="sheetUseBtn" style="background:var(--primary);color:#fff;border:none;">🎁 이 식당으로 혜택 이용하기</button>
+        ${r['지도 링크'] ? `<a class="naver-btn" href="${esc(r['지도 링크'])}" target="_blank" rel="noopener" style="margin-top:8px;">네이버 지도에서 보기</a>` : ''}
       `;
 
-      if (images.length > 1) {
-        document.getElementById('sliderPrev').addEventListener('click', () => slide(-1));
-        document.getElementById('sliderNext').addEventListener('click', () => slide(1));
-      }
+      const useBtn = document.getElementById('sheetUseBtn');
+      if (useBtn) useBtn.addEventListener('click', () => {
+        closeSheet();
+        if (window.openUseModal) window.openUseModal(name);
+      });
 
       sheet.classList.add('open');
       backdrop.classList.add('open');
     }
 
-    function slide(delta) {
+        function slide(delta) {
       const { items } = slideState;
       if (!items.length) return;
       slideState.idx = (slideState.idx + delta + items.length) % items.length;
@@ -1382,7 +1350,7 @@
 
     // ---- 라이더 후기 작성 모달 ----
     (function initReview() {
-      const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykpP62-rEwejjzwvwOhTy-FXlVfr-N5PUaiSxC4GRhqwAdMgVFJEzLRPs4l1_NTd2mLA/exec';
+      const APPS_SCRIPT_URL = NEW_EXEC_URL;
 
       const openBtn = document.getElementById('reviewOpenBtn');
       const backdrop = document.getElementById('reviewModalBackdrop');
@@ -1483,6 +1451,7 @@
         }
 
         const payload = {
+          action: 'saveReview',
           restaurant: restaurantSel.value,
           rating: selectedRating,
           review: reviewText.value.trim()
@@ -1525,16 +1494,15 @@
       });
     })();
 
-    // ---- 내 혜택 보기 모달 ----
-    (function initMyHistory() {
-      const PARTNER_API_URL = 'https://script.google.com/macros/s/AKfycbxbcJQwoLnF4jAu_gL7xnJOJlJfyzznmd8ardaISniyV6pddX-M4UiYcDRSib1HF4sEnA/exec';
-
+    // ---- 식사 혜택 이용하기 모달 ----
+    (function initUse() {
       const openBtn = document.getElementById('historyOpenBtn');
       const backdrop = document.getElementById('historyModalBackdrop');
       const closeBtn = document.getElementById('historyModalClose');
       const backBtn = document.getElementById('historyBackBtn');
       const lookupBtn = document.getElementById('historyLookupBtn');
-      const phoneInput = document.getElementById('historyPhoneInput');
+      const codeInput = document.getElementById('historyPhoneInput');
+      const storeSel = document.getElementById('useRestaurant');
       const errorDiv = document.getElementById('historyStep1Error');
       const step1 = document.getElementById('historyStep1View');
       const step2 = document.getElementById('historyStep2View');
@@ -1543,230 +1511,145 @@
       const markUsedBtn = document.getElementById('historyMarkUsedBtn');
       const markUsedHint = document.getElementById('historyMarkUsedHint');
       const markUsedError = document.getElementById('historyMarkUsedError');
-      let currentCode = '';
+      const titleEl = document.getElementById('couponTitle1');
+      const title2El = document.getElementById('couponTitle2');
+      const expiryEl = document.getElementById('couponExpiry');
+      const statusEl = document.getElementById('couponStatus');
+      const codeBanner = document.getElementById('historyRiderNum');
 
-      function openModal() {
+      let currentCode = '', currentStore = '';
+
+      function populateStores() {
+        while (storeSel.options.length > 1) storeSel.remove(1);
+        const list = window.__restaurants || [];
+        list.forEach(r => {
+          const name = r['식당명']; if (!name) return;
+          const remain = r['잔여건수'];
+          const cat = (r['분류'] || '').trim();
+          const tag = cat === '카페' ? '☕ 카페 · ' : (cat === '음식점' ? '🍚 음식점 · ' : (cat ? cat + ' · ' : ''));
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = tag + name + (remain != null ? ' (잔여 ' + remain + ')' : '');
+          if (remain != null && Number(remain) <= 0) { opt.disabled = true; opt.textContent += ' · 마감'; }
+          storeSel.appendChild(opt);
+        });
+      }
+      function showStep1() { step1.hidden = false; step2.hidden = true; errorDiv.hidden = true; }
+      function openModal(preStore) {
+        populateStores();
         showStep1();
+        if (preStore) storeSel.value = preStore;
+        codeInput.value = '';
         backdrop.classList.add('open');
-        setTimeout(() => phoneInput.focus(), 100);
+        setTimeout(() => { (preStore ? codeInput : storeSel).focus(); }, 100);
       }
       function closeModal() { backdrop.classList.remove('open'); }
-
-      function showStep1() {
-        step1.hidden = false;
-        step2.hidden = true;
-        phoneInput.value = '';
-        errorDiv.hidden = true;
-        errorDiv.textContent = '';
-        setLookupBtn(false);
-      }
+      window.openUseModal = openModal;
 
       function setLookupBtn(loading) {
-        if (loading) {
-          lookupBtn.disabled = true;
-          lookupBtn.innerHTML = '<span class="btn-spinner"></span>조회 중입니다...';
-        } else {
-          lookupBtn.disabled = false;
-          lookupBtn.textContent = '조회하기';
-        }
+        lookupBtn.disabled = loading;
+        lookupBtn.innerHTML = loading ? '<span class="btn-spinner"></span>확인 중입니다...' : '확인하기';
+      }
+      function reasonMsg(reason, cat) {
+        if (reason === 'invalid_code') return '혜택 대상자가 아니에요.<br>쿠폰코드를 다시 확인해 주세요.';
+        if (reason === 'no_store') return '식당을 다시 선택해 주세요.';
+        if (reason === 'sold_out') return '이 가게의 혜택이 모두 소진됐어요.';
+        if (reason === 'already_today') return '오늘은 이미 ' + (cat || '해당 분류') + ' 혜택을 사용했어요.<br>(내일 다시 이용 가능)';
+        return '확인에 실패했어요. 잠시 후 다시 시도해 주세요.';
       }
 
-      // "2026-05-22 13:40" → "5월 22일"
-      function formatDayKor(dateString) {
-        if (!dateString) return '';
-        const m = String(dateString).match(/(\d{4})[-./]\s*(\d{1,2})[-./]\s*(\d{1,2})/);
-        if (m) return Number(m[2]) + '월 ' + Number(m[3]) + '일';
-        return String(dateString);
-      }
-
-      // 날짜 값(시트 텍스트 / JS Date 문자열 / ISO) → "2026-06-30" 형태로 통일 (시간 제거)
-      function formatDateYMD(value) {
-        if (!value) return '';
-        const s = String(value).trim();
-        // 이미 YYYY-MM-DD로 시작하면 앞 10자리만 사용
-        const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if (iso) return iso[1] + '-' + iso[2] + '-' + iso[3];
-        // 그 외(예: "Tue Jun 30 2026 00:00:00 GMT+0900")는 Date로 파싱해 변환
-        const d = new Date(s);
-        if (!isNaN(d.getTime())) {
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          return y + '-' + m + '-' + day;
-        }
-        return s;
-      }
-
-      async function handleLookup() {
-        const code = phoneInput.value.trim();
-        // 쿠폰코드 7자리 (영문 대소문자·숫자)
-        if (!/^[A-Za-z0-9]{7}$/.test(code)) {
-          errorDiv.textContent = '쿠폰코드 7자리를 입력해 주세요.';
-          errorDiv.hidden = false;
-          return;
-        }
+      async function handleCheck() {
+        const code = codeInput.value.trim();
+        const store = storeSel.value;
+        if (!store) { errorDiv.textContent = '방문하신 식당을 선택해 주세요.'; errorDiv.hidden = false; return; }
+        if (!/^[A-Za-z0-9]{5,10}$/.test(code)) { errorDiv.textContent = '쿠폰코드를 입력해 주세요.'; errorDiv.hidden = false; return; }
         errorDiv.hidden = true;
         setLookupBtn(true);
-
         try {
-          const res = await fetch(PARTNER_API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'getMyHistory', accessCode: code })
-          });
+          const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'checkUse', code: code, store: store }) });
           const data = await res.json();
-
-          if (data.success) {
-            renderMyHistory(data, code);
-          } else {
-            errorDiv.textContent = data.message || '조회에 실패했습니다.';
-            errorDiv.hidden = false;
-            setLookupBtn(false);
-          }
+          currentCode = code; currentStore = store;
+          renderResult(data);
         } catch (err) {
-          console.error('[benefit] lookup failed:', err);
-          errorDiv.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+          errorDiv.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
           errorDiv.hidden = false;
+        } finally {
           setLookupBtn(false);
         }
       }
 
-      function renderMyHistory(data, code) {
-        const shownCode = data.accessCode || code || phoneInput.value.trim();
-        currentCode = shownCode;
-        document.getElementById('historyRiderNum').textContent = shownCode;
-
-        step1.hidden = true;
-        step2.hidden = false;
-
-        const benefit = data.benefit || null;
-
-        // 혜택 대상자가 아닌 경우 (코드 미등록)
-        if (!data.found || !benefit) {
-          emptyAll.hidden = false;
-          dataView.hidden = true;
+      function renderResult(data) {
+        codeBanner.textContent = currentCode;
+        step1.hidden = true; step2.hidden = false;
+        markUsedError.hidden = true;
+        if (!data || !data.ok) {
+          emptyAll.hidden = false; dataView.hidden = true;
+          emptyAll.innerHTML = reasonMsg(data && data.reason, data && data['분류']);
           return;
         }
-
-        emptyAll.hidden = true;
-        dataView.hidden = false;
-        renderSingleCoupon(benefit);
+        emptyAll.hidden = true; dataView.hidden = false;
+        titleEl.textContent = '혜택 제공 대상자입니다';
+        title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
+        title2El.style.display = '';
+        if (data['잔여'] != null) { expiryEl.textContent = '잔여 ' + data['잔여'] + '건'; expiryEl.style.display = ''; }
+        else { expiryEl.style.display = 'none'; }
+        statusEl.textContent = '✅ 사용 가능';
+        statusEl.className = 'single-coupon-status is-unused';
+        markUsedBtn.hidden = false; markUsedHint.hidden = false;
+        markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
       }
 
-      function renderSingleCoupon(b) {
-        const title1 = document.getElementById('couponTitle1');
-        const title2 = document.getElementById('couponTitle2');
-        const expiry = document.getElementById('couponExpiry');
-        const status = document.getElementById('couponStatus');
-
-        title1.textContent = b.title1 || '무료식사권';
-
-        if (b.title2) {
-          title2.textContent = b.title2;
-          title2.style.display = '';
-        } else {
-          title2.style.display = 'none';
-        }
-
-        // 사용일시 값이 있으면 사용완료, 없으면 미사용
-        const usedAt = (b.usedAt == null) ? '' : String(b.usedAt).trim();
-
-        // 유효기간: 사용 완료된 건은 숨김 (미사용일 때만 노출)
-        if (b.validUntil && !usedAt) {
-          expiry.textContent = '유효기간: ' + formatDateYMD(b.validUntil);
-          expiry.style.display = '';
-        } else {
-          expiry.style.display = 'none';
-        }
-
-        markUsedError.hidden = true;
-        if (usedAt) {
-          status.textContent = '사용완료 · ' + formatDateYMD(usedAt);
-          status.className = 'single-coupon-status is-used';
-          // 이미 사용한 건은 사용 처리 버튼 숨김
-          markUsedBtn.hidden = true;
-          markUsedHint.hidden = true;
-        } else {
-          status.textContent = '✅ 아직 사용하지 않았어요';
-          status.className = 'single-coupon-status is-unused';
-          // 미사용 → 사장님이 사용 처리할 수 있는 버튼 노출
-          markUsedBtn.hidden = false;
-          markUsedHint.hidden = false;
-          markUsedBtn.disabled = false;
-          markUsedBtn.textContent = '사장님 사용 처리';
-        }
-      }
-
-      // 사장님이 무료식사권을 사용 처리 (백엔드에 usedAt 기록)
       async function handleMarkUsed() {
-        if (!currentCode) return;
-        if (!confirm('이 무료식사권을 사용 처리할까요?\n한 번 처리하면 되돌릴 수 없어요.')) return;
-
+        if (!currentCode || !currentStore) return;
+        if (!confirm('실제 이용하시는 게 맞나요?\n사용 처리하면 사용 가능 건수에서 차감되며, 되돌릴 수 없어요.')) return;
         markUsedBtn.disabled = true;
         markUsedBtn.innerHTML = '<span class="btn-spinner"></span>처리 중입니다...';
         markUsedError.hidden = true;
-
         try {
-          const res = await fetch(PARTNER_API_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'markUsed', accessCode: currentCode })
-          });
+          const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'markUsed', code: currentCode, store: currentStore }) });
           const data = await res.json();
-
-          if (data.success) {
-            // 백엔드가 갱신된 benefit(usedAt 포함)을 돌려주면 그대로, 아니면 사용처리 표시만
-            const benefit = data.benefit || {};
-            if (!benefit.usedAt) benefit.usedAt = data.usedAt || '사용완료';
-            renderSingleCoupon(benefit);
+          if (data && data.success) {
+            titleEl.textContent = '사용 완료';
+            title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
+            expiryEl.style.display = 'none';
+            statusEl.innerHTML = '✅ 혜택을 제공해 주세요' + (data['잔여'] != null ? '<br><span style="font-size:13px;color:#888;font-weight:500;">잔여 ' + data['잔여'] + '건</span>' : '');
+            statusEl.className = 'single-coupon-status is-used';
+            markUsedBtn.hidden = true; markUsedHint.hidden = true;
+            refreshStores();
           } else {
-            markUsedError.textContent = data.message || '사용 처리에 실패했어요. 잠시 후 다시 시도해 주세요.';
+            markUsedError.innerHTML = reasonMsg(data && data.reason, data && data['분류']);
             markUsedError.hidden = false;
-            markUsedBtn.disabled = false;
-            markUsedBtn.textContent = '사장님 사용 처리';
+            markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
           }
         } catch (err) {
-          console.error('[benefit] markUsed failed:', err);
           markUsedError.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
           markUsedError.hidden = false;
-          markUsedBtn.disabled = false;
-          markUsedBtn.textContent = '사장님 사용 처리';
+          markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
         }
       }
 
-      // 이벤트 핸들러
-      openBtn.addEventListener('click', openModal);
+      async function refreshStores() {
+        try {
+          const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'getStores' }) });
+          const out = await res.json();
+          if (out && out.stores) window.__restaurants = out.stores;
+        } catch (e) {}
+      }
+
+      openBtn.addEventListener('click', () => openModal());
       closeBtn.addEventListener('click', closeModal);
       backBtn.addEventListener('click', showStep1);
-      backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) closeModal();
-      });
-
-      phoneInput.addEventListener('input', (e) => {
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+      codeInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 7);
         if (!errorDiv.hidden) errorDiv.hidden = true;
       });
-      phoneInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          handleLookup();
-        }
-      });
-      lookupBtn.addEventListener('click', handleLookup);
+      codeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleCheck(); } });
+      lookupBtn.addEventListener('click', handleCheck);
       markUsedBtn.addEventListener('click', handleMarkUsed);
     })();
 
-    // ---- 배민라이더 확인 (전체화면) ----
-    (function initVerify() {
-      const screen = document.getElementById('verifyScreen');
-      const openBtn = document.getElementById('riderVerifyBtn');
-      const closeBtn = document.getElementById('verifyCloseBtn');
-      function open() { screen.classList.add('open'); }
-      function close() { screen.classList.remove('open'); }
-      openBtn.addEventListener('click', open);
-      closeBtn.addEventListener('click', close);
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && screen.classList.contains('open')) close();
-      });
-    })();
+    // (배민라이더 확인 화면 제거됨)
 
     function esc(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
