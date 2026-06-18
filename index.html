@@ -649,7 +649,7 @@
       border-radius: 10px;
       font-size: 13px;
       color: var(--text-sub);
-      margin-bottom: 28px;
+      margin-bottom: 18px;
       letter-spacing: -0.2px;
     }
     .rider-id-banner strong {
@@ -979,6 +979,23 @@
       .verify-title { font-size: 52px; }
       .verify-msg { font-size: 21px; }
     }
+    /* 상세 화면 강조 */
+    .detail-time{font-size:16px;font-weight:700;color:#111;margin:6px 0 10px;}
+    .detail-benefit{font-size:15px;font-weight:600;color:var(--primary-dark);margin-bottom:10px;}
+    .detail-remain{display:flex;align-items:baseline;gap:6px;background:#F0FBFA;border:1px solid #D6F2EF;border-radius:12px;padding:12px 16px;margin-bottom:14px;}
+    .detail-remain-label{font-size:13px;color:#666;font-weight:600;}
+    .detail-remain-num{font-size:30px;font-weight:800;color:var(--primary-dark);line-height:1;}
+    .detail-remain-unit{font-size:14px;color:#666;font-weight:600;}
+    .detail-notice{font-size:14px;color:#3a3a3a;line-height:1.7;margin-top:6px;white-space:normal;word-break:break-word;}
+    .notice-block{background:#FFF8E6;border:1px solid #F4E2AE;border-left:4px solid #F2B705;}
+    .notice-block .menu-label{color:#9A7B1F;}
+    .usage-link-inbox{display:block;width:100%;text-align:left;margin-top:8px;padding:8px 0 0;border:none;border-top:1px solid #e3e6e9;background:none;color:var(--primary-dark);font-size:13px;font-weight:600;text-decoration:underline;cursor:pointer;}
+    .usage-link-inbox[hidden]{display:none;}
+    .usage-link-btn{display:block;width:100%;margin-top:14px;background:none;border:none;color:#5b6b7a;font-size:13px;text-decoration:underline;cursor:pointer;padding:8px;}
+    .usage-list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid #eee;font-size:14px;}
+    .usage-list-item span:first-child{font-weight:600;color:#222;}
+    .usage-list-date{color:#888;font-size:13px;white-space:nowrap;}
+    .usage-empty{text-align:center;color:#999;padding:28px 0;font-size:14px;}
   </style>
 </head>
 <body>
@@ -989,25 +1006,28 @@
     </header>
 
     <div class="header-cta-bar">
-      <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🎁 식사 혜택 이용하기</button>
+      <button class="header-cta header-cta--mint" id="historyOpenBtn" type="button">🎁 혜택 이용하기</button>
       <button class="header-cta" id="reviewOpenBtn" type="button">✏️ 이용후기</button>
     </div>
 
     <div class="guide-bar" id="guideBar">
       <button class="guide-bar-toggle" id="guideToggle" aria-expanded="false" aria-controls="guideContent">
-        <span>📌 이용방법 보기 <span class="guide-hint">(눌러서 펼치기)</span></span>
+        <span>📌 이용방법 보기 <span class="guide-hint" id="guideHint">(눌러서 펼치기)</span></span>
         <span class="guide-chevron">⌄</span>
       </button>
       <div class="guide-bar-content" id="guideContent">
         <div class="guide-body">
           <div class="section-title">[이용방법]</div>
           <ol>
-            <li>지도에서 식당별 혜택 시간·메뉴·내용을 확인하세요.</li>
-            <li>'식사 혜택 이용하기'를 눌러 방문할 식당을 선택하세요.</li>
-            <li>문자로 받은 쿠폰코드를 입력하면 혜택 대상자 화면이 떠요.</li>
-            <li>사장님이 '사용 처리'를 누르면 혜택을 받을 수 있어요.</li>
+            <li>지도에서 가게별 혜택 시간·쿠폰 할인 금액·메뉴 등을 확인하세요.</li>
+            <li>'혜택 이용하기'를 눌러 방문할 가게를 선택하세요.</li>
+            <li>문자로 받은 입장코드를 입력하면 혜택 적용 대상자 화면이 나타납니다.</li>
+            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
+            <li>먹고 싶은 메뉴를 주문하세요.</li>
           </ol>
-          <p class="closing">🎁 쿠폰코드는 하루에 음식점 1회·카페 1회 사용할 수 있어요.</p>
+          <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</p>
+          <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요. </p>
+          <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
         </div>
       </div>
     </div>
@@ -1082,36 +1102,42 @@
     <div class="modal-card">
       <button class="modal-close" id="historyModalClose" aria-label="닫기">✕</button>
 
-      <!-- Step 1: 식당 선택 + 쿠폰코드 -->
+      <!-- Step 1: 식당 선택 + 입장코드 -->
       <div id="historyStep1View">
-        <div class="modal-title" id="historyModalTitle">🎁 식사 혜택 이용하기</div>
+        <div class="modal-title" id="historyModalTitle">🎁 혜택 이용하기</div>
         <div class="usage-guide">
           <div class="usage-title">[이용방법]</div>
           <ol class="usage-list">
-            <li>방문하신 식당을 선택해 주세요.</li>
-            <li>문자로 받으신 쿠폰코드를 입력해 주세요.
-              <span class="usage-sub">· 쿠폰코드는 하루에 음식점 1회·카페 1회 사용할 수 있어요</span>
+            <li>방문하신 가게를 선택해 주세요.</li>
+            <li>문자로 받은 입장코드를 입력하면 혜택 적용 대상자 화면이 나타납니다.</li>
+            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
+            <li>먹고 싶은 메뉴를 주문하세요.</li>
+              <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</span>
+              <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요.</span>
+              <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+
             </li>
           </ol>
         </div>
         <div class="form-field">
-          <label for="useRestaurant">방문하신 식당<span class="req">*</span></label>
+          <label for="useRestaurant">방문하신 가게<span class="req">*</span></label>
           <select id="useRestaurant" required>
-            <option value="">식당을 선택해주세요</option>
+            <option value="">가게를 선택해주세요</option>
           </select>
         </div>
         <input type="text" id="historyPhoneInput" class="phone-input" inputmode="text"
           autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="7"
-          placeholder="쿠폰코드 입력" autocomplete="off" />
+          placeholder="입장코드 입력" autocomplete="off" />
         <div id="historyStep1Error" class="form-error" hidden></div>
         <button type="button" id="historyLookupBtn" class="modal-ok">확인하기</button>
       </div>
 
       <!-- Step 2: 결과 -->
       <div id="historyStep2View" hidden>
-        <button type="button" class="modal-back" id="historyBackBtn">← 뒤로 가기</button>
+        <button type="button" class="modal-back" id="historyBackBtn">← 처음으로</button>
         <div class="rider-id-banner">
-          쿠폰코드: <strong id="historyRiderNum">—</strong>
+          <div>입장코드: <strong id="historyRiderNum">—</strong></div>
+          <button type="button" id="historyMyUsageBtn" class="usage-link-inbox" hidden>📋 내 사용내역 보기</button>
         </div>
 
         <div id="historyEmptyAll" class="history-empty-all" hidden>
@@ -1119,16 +1145,23 @@
         </div>
 
         <div id="historyDataView" hidden>
-          <div class="single-coupon-card">
-            <div class="single-coupon-emoji">🎁</div>
-            <div class="single-coupon-title1" id="couponTitle1">혜택 제공 대상자입니다</div>
-            <div class="single-coupon-title2" id="couponTitle2"></div>
-            <div class="single-coupon-expiry" id="couponExpiry"></div>
-            <div class="single-coupon-status" id="couponStatus"></div>
+          <div id="useMainBlock">
+            <div class="single-coupon-card">
+              <div class="single-coupon-emoji">🎁</div>
+              <div class="single-coupon-title1" id="couponTitle1">혜택 제공 대상자입니다</div>
+              <div class="single-coupon-title2" id="couponTitle2"></div>
+              <div class="single-coupon-expiry" id="couponExpiry"></div>
+              <div class="single-coupon-status" id="couponStatus"></div>
+            </div>
+            <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>사장님 사용 처리</button>
+            <p class="mark-used-hint" id="historyMarkUsedHint" hidden style="color:#d33;font-weight:600;line-height:1.5;">⚠️ 실제 이용하시는 경우에만 사장님이 직접 '사용 처리'를 눌러주세요.<br>실수로 누르면 사용 가능 건수에서 차감되며 되돌릴 수 없어요.</p>
+            <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
           </div>
-          <button type="button" id="historyMarkUsedBtn" class="mark-used-btn" hidden>사장님 사용 처리</button>
-          <p class="mark-used-hint" id="historyMarkUsedHint" hidden style="color:#d33;font-weight:600;line-height:1.5;">⚠️ 실제 이용하시는 경우에만 사장님이 직접 '사용 처리'를 눌러주세요.<br>실수로 누르면 사용 가능 건수에서 차감되며 되돌릴 수 없어요.</p>
-          <div id="historyMarkUsedError" class="form-error" hidden style="margin-top:10px;"></div>
+          <div id="myUsageView" hidden>
+            <button type="button" class="modal-back" id="usageBackBtn">← 사장님 처리 화면으로</button>
+            <div class="modal-title" style="font-size:17px;margin-bottom:6px;">📋 내 사용내역</div>
+            <div id="usageListBox"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1146,7 +1179,7 @@
     <div class="verify-inner">
       <div class="verify-check" aria-hidden="true">✓</div>
       <div class="verify-title">배민라이더</div>
-      <div class="verify-msg">사장님, 우리 가게 식사 혜택을<br>제공해 주세요.</div>
+      <div class="verify-msg">사장님, 우리 가게 혜택을<br>제공해 주세요.</div>
       <div class="verify-thanks">감사합니다</div>
     </div>
     <button type="button" class="verify-close" id="verifyCloseBtn">닫기</button>
@@ -1290,14 +1323,18 @@
       const remain = (r['잔여건수'] === 0 || r['잔여건수']) ? r['잔여건수'] : null;
       const total = r['총 쿠폰수'];
 
+      const noticeHtml = r['안내사항'] ? esc(String(r['안내사항']).replace(/^[\s\n]+/, '').replace(/\n{3,}/g, '\n\n')).replace(/\n/g, '<br>') : '';
       content.innerHTML = `
         <div class="r-name">${esc(name)}</div>
         <div class="r-loc">📍 ${esc(r['전체 주소'] || r['위치'] || '')}</div>
 
-        <div class="badge-row">
-          ${r['혜택 적용 시간'] ? `<span class="badge badge-time">⏰ ${esc(r['혜택 적용 시간'])}</span>` : ''}
-          ${r['라이더 혜택'] ? `<span class="badge badge-discount">🎁 ${esc(r['라이더 혜택'])}</span>` : ''}
-          ${remain != null ? `<span class="badge badge-time">🎫 잔여 ${esc(remain)}${total ? ' / ' + esc(total) : ''}</span>` : (r['사용건수'] != null ? `<span class="badge badge-time">🎫 누적 ${esc(r['사용건수'])}건 사용</span>` : '')}
+        <div class="detail-time">⏰ ${esc(r['혜택 적용 시간'] || r['혜택 제공 시간'] || '시간 정보 없음')}</div>
+        ${r['라이더 혜택'] ? `<div class="detail-benefit">🎁 ${esc(r['라이더 혜택'])}</div>` : ''}
+
+        <div class="detail-remain">
+          ${remain != null
+            ? `<span class="detail-remain-label">남은 쿠폰</span><span class="detail-remain-num">${esc(remain)}</span><span class="detail-remain-unit">개${total ? ' / ' + esc(total) : ''}</span>`
+            : (r['사용건수'] != null ? `<span class="detail-remain-label">누적 사용</span><span class="detail-remain-num">${esc(r['사용건수'])}</span><span class="detail-remain-unit">건</span>` : `<span class="detail-remain-label">이용 가능</span>`)}
         </div>
 
         <div class="menu-block">
@@ -1305,7 +1342,9 @@
           <div class="menu-name">${esc(r['대표 메뉴'] || '-')}</div>
         </div>
 
-        <button type="button" class="naver-btn" id="sheetUseBtn" style="background:var(--primary);color:#fff;border:none;">🎁 이 식당으로 혜택 이용하기</button>
+        ${noticeHtml ? `<div class="menu-block notice-block"><div class="menu-label">📌 안내사항</div><div class="detail-notice">${noticeHtml}</div></div>` : ''}
+
+        <button type="button" class="naver-btn" id="sheetUseBtn" style="background:var(--primary);color:#fff;border:none;">🎁 이 가게 혜택 이용하기</button>
         ${r['지도 링크'] ? `<a class="naver-btn" href="${esc(r['지도 링크'])}" target="_blank" rel="noopener" style="margin-top:8px;">네이버 지도에서 보기</a>` : ''}
       `;
 
@@ -1342,9 +1381,11 @@
       const bar = document.getElementById('guideBar');
       const toggle = document.getElementById('guideToggle');
 
+      const hint = document.getElementById('guideHint');
       toggle.addEventListener('click', () => {
         const opened = bar.classList.toggle('open');
         toggle.setAttribute('aria-expanded', opened);
+        if (hint) hint.textContent = opened ? '(눌러서 닫기)' : '(눌러서 펼치기)';
       });
     })();
 
@@ -1551,7 +1592,7 @@
         lookupBtn.innerHTML = loading ? '<span class="btn-spinner"></span>확인 중입니다...' : '확인하기';
       }
       function reasonMsg(reason, cat) {
-        if (reason === 'invalid_code') return '혜택 대상자가 아니에요.<br>쿠폰코드를 다시 확인해 주세요.';
+        if (reason === 'invalid_code') return '혜택 대상자가 아니에요.<br>입장코드를 다시 확인해 주세요.';
         if (reason === 'no_store') return '식당을 다시 선택해 주세요.';
         if (reason === 'sold_out') return '이 가게의 혜택이 모두 소진됐어요.';
         if (reason === 'already_today') return '오늘은 이미 ' + (cat || '해당 분류') + ' 혜택을 사용했어요.<br>(내일 다시 이용 가능)';
@@ -1562,7 +1603,7 @@
         const code = codeInput.value.trim();
         const store = storeSel.value;
         if (!store) { errorDiv.textContent = '방문하신 식당을 선택해 주세요.'; errorDiv.hidden = false; return; }
-        if (!/^[A-Za-z0-9]{5,10}$/.test(code)) { errorDiv.textContent = '쿠폰코드를 입력해 주세요.'; errorDiv.hidden = false; return; }
+        if (!/^[A-Za-z0-9]{5,10}$/.test(code)) { errorDiv.textContent = '입장코드를 입력해 주세요.'; errorDiv.hidden = false; return; }
         errorDiv.hidden = true;
         setLookupBtn(true);
         try {
@@ -1584,47 +1625,66 @@
         markUsedError.hidden = true;
         if (!data || !data.ok) {
           emptyAll.hidden = false; dataView.hidden = true;
+          if (myUsageBtn) myUsageBtn.hidden = true;
           emptyAll.innerHTML = reasonMsg(data && data.reason, data && data['분류']);
           return;
         }
         emptyAll.hidden = true; dataView.hidden = false;
+        document.getElementById('useMainBlock').hidden = false;
+        document.getElementById('myUsageView').hidden = true;
+        if (myUsageBtn) myUsageBtn.hidden = false;
         titleEl.textContent = '혜택 제공 대상자입니다';
         title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
         title2El.style.display = '';
         if (data['잔여'] != null) { expiryEl.textContent = '잔여 ' + data['잔여'] + '건'; expiryEl.style.display = ''; }
         else { expiryEl.style.display = 'none'; }
-        statusEl.textContent = '✅ 사용 가능';
+        statusEl.textContent = '✅ 사용 가능'; 
         statusEl.className = 'single-coupon-status is-unused';
         markUsedBtn.hidden = false; markUsedHint.hidden = false;
         markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
       }
 
+      function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
       async function handleMarkUsed() {
         if (!currentCode || !currentStore) return;
         if (!confirm('실제 이용하시는 게 맞나요?\n사용 처리하면 사용 가능 건수에서 차감되며, 되돌릴 수 없어요.')) return;
         markUsedBtn.disabled = true;
-        markUsedBtn.innerHTML = '<span class="btn-spinner"></span>처리 중입니다...';
         markUsedError.hidden = true;
-        try {
-          const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'markUsed', code: currentCode, store: currentStore }) });
-          const data = await res.json();
-          if (data && data.success) {
-            titleEl.textContent = '사용 완료';
-            title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
-            expiryEl.style.display = 'none';
-            statusEl.innerHTML = '✅ 혜택을 제공해 주세요' + (data['잔여'] != null ? '<br><span style="font-size:13px;color:#888;font-weight:500;">잔여 ' + data['잔여'] + '건</span>' : '');
-            statusEl.className = 'single-coupon-status is-used';
-            markUsedBtn.hidden = true; markUsedHint.hidden = true;
-            refreshStores();
-          } else {
-            markUsedError.innerHTML = reasonMsg(data && data.reason, data && data['분류']);
+        const MAX = 3;
+        for (let attempt = 1; attempt <= MAX; attempt++) {
+          markUsedBtn.innerHTML = (attempt === 1)
+            ? '<span class="btn-spinner"></span>처리 중입니다...'
+            : '<span class="btn-spinner"></span>잠시 혼잡합니다. 다시 시도 중... (' + attempt + '/' + MAX + ')';
+          try {
+            const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'markUsed', code: currentCode, store: currentStore }) });
+            const data = await res.json();
+            if (data && data.success) {
+              titleEl.textContent = '사용 완료';
+              title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
+              if (data['잔여'] != null) { expiryEl.textContent = '잔여 ' + data['잔여'] + '건'; expiryEl.style.display = ''; }
+              else { expiryEl.style.display = 'none'; }
+              statusEl.textContent = '✅ 혜택을 제공해 주세요';
+              statusEl.className = 'single-coupon-status is-used';
+              markUsedBtn.hidden = true; markUsedHint.hidden = true;
+              refreshStores();
+              return;
+            }
+            // 혼잡(busy)일 때만 자동 재시도, 그 외(이미 사용/소진/무효)는 즉시 안내
+            if (data && data.reason === 'busy' && attempt < MAX) { await sleep(2500); continue; }
+            markUsedError.innerHTML = (data && data.reason === 'busy')
+              ? '지금 처리가 혼잡해요. 차감되지 않았으니 잠시 후 다시 눌러주세요.'
+              : reasonMsg(data && data.reason, data && data['분류']);
             markUsedError.hidden = false;
             markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
+            return;
+          } catch (err) {
+            if (attempt < MAX) { await sleep(2500); continue; }
+            markUsedError.textContent = '네트워크가 불안정해요. 차감되지 않았으니 다시 눌러주세요.';
+            markUsedError.hidden = false;
+            markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
+            return;
           }
-        } catch (err) {
-          markUsedError.textContent = '네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요.';
-          markUsedError.hidden = false;
-          markUsedBtn.disabled = false; markUsedBtn.textContent = '사장님 사용 처리';
         }
       }
 
@@ -1635,6 +1695,33 @@
           if (out && out.stores) window.__restaurants = out.stores;
         } catch (e) {}
       }
+
+      const myUsageBtn = document.getElementById('historyMyUsageBtn');
+      const usageBackBtn = document.getElementById('usageBackBtn');
+      const useMainBlock = document.getElementById('useMainBlock');
+      const myUsageView = document.getElementById('myUsageView');
+      const usageListBox = document.getElementById('usageListBox');
+
+      function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      function fmtDate(s) { const m = String(s || '').match(/(\d{4})-(\d{1,2})-(\d{1,2})/); return m ? (Number(m[2]) + '월 ' + Number(m[3]) + '일') : (s || ''); }
+
+      async function loadMyUsage() {
+        usageListBox.innerHTML = '<div class="usage-empty">불러오는 중...</div>';
+        try {
+          const res = await fetch(NEW_EXEC_URL, { method: 'POST', body: JSON.stringify({ action: 'myHistory', code: currentCode }) });
+          const data = await res.json();
+          const list = (data && data.history) ? data.history : [];
+          if (!list.length) { usageListBox.innerHTML = '<div class="usage-empty">아직 사용한 내역이 없어요.</div>'; return; }
+          usageListBox.innerHTML = list.map(function (hh) {
+            return '<div class="usage-list-item"><span>' + escHtml(hh.store) + (hh.benefit ? ' · ' + escHtml(hh.benefit) : '') + '</span><span class="usage-list-date">' + fmtDate(hh.date) + '</span></div>';
+          }).join('');
+        } catch (e) {
+          usageListBox.innerHTML = '<div class="usage-empty">내역을 불러오지 못했어요.</div>';
+        }
+      }
+
+      if (myUsageBtn) myUsageBtn.addEventListener('click', function () { useMainBlock.hidden = true; myUsageView.hidden = false; myUsageBtn.hidden = true; loadMyUsage(); });
+      if (usageBackBtn) usageBackBtn.addEventListener('click', function () { myUsageView.hidden = true; useMainBlock.hidden = false; myUsageBtn.hidden = false; });
 
       openBtn.addEventListener('click', () => openModal());
       closeBtn.addEventListener('click', closeModal);
