@@ -311,6 +311,7 @@
       opacity: 0.6;
     }
     .guide-bar.open .guide-chevron { transform: rotate(180deg); }
+    .guide-bar.open .guide-hint { color: var(--primary-dark); opacity: 1; font-weight: 700; }
     .guide-bar-content {
       max-height: 0;
       overflow: hidden;
@@ -822,7 +823,8 @@
     .usage-list { margin: 0; padding-left: 20px; }
     .usage-list li { font-size: 13.5px; color: var(--text); line-height: 1.6; letter-spacing: -0.2px; margin-bottom: 8px; }
     .usage-list li:last-child { margin-bottom: 0; }
-    .usage-sub { display: block; font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+    .usage-sub { display: block; font-size: 10.5px; color: var(--text-sub); margin-top: 2px; line-height: 1.5; }
+    .usage-notes { margin-top: 8px; }
 
     /* ───── 단일 무료식사권 카드 ───── */
     .single-coupon-card {
@@ -1012,7 +1014,7 @@
 
     <div class="guide-bar" id="guideBar">
       <button class="guide-bar-toggle" id="guideToggle" aria-expanded="false" aria-controls="guideContent">
-        <span>📌 이용방법 보기 <span class="guide-hint">(눌러서 펼치기)</span></span>
+        <span>📌 이용방법 보기 <span class="guide-hint" id="guideHint">(눌러서 펼치기)</span></span>
         <span class="guide-chevron">⌄</span>
       </button>
       <div class="guide-bar-content" id="guideContent">
@@ -1021,8 +1023,8 @@
           <ol>
             <li>지도에서 가게별 혜택 시간·쿠폰 할인 금액·메뉴 등을 확인하세요.</li>
             <li>'혜택 이용하기'를 눌러 방문할 가게를 선택하세요.</li>
-            <li>문자로 받은 입장코드를 입력하면 혜택 대상자 화면이 나타나요.</li>
-            <li>화면을 사장님께 보여드리고 '사용 처리'를 요청하세요.</li>
+            <li>문자로 받은 입장코드를 입력하면 혜택 적용 대상자 화면이 나타납니다.</li>
+            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
             <li>먹고 싶은 메뉴를 주문하세요.</li>
           </ol>
           <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</p>
@@ -1109,15 +1111,15 @@
           <div class="usage-title">[이용방법]</div>
           <ol class="usage-list">
             <li>방문하신 가게를 선택해 주세요.</li>
-            <li>문자로 받은 입장코드를 입력하면 혜택 대상자 화면이 나타나요.</li>
-            <li>화면을 사장님께 보여드리고 '사용 처리'를 요청하세요.</li>
+            <li>문자로 받은 입장코드를 입력하면 혜택 적용 대상자 화면이 나타납니다.</li>
+            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
             <li>먹고 싶은 메뉴를 주문하세요.</li>
-              <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</span>
-              <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요.</span>
-              <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
-
-            </li>
           </ol>
+          <div class="usage-notes">
+            <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</span>
+            <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요.</span>
+            <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+          </div>
         </div>
         <div class="form-field">
           <label for="useRestaurant">방문하신 가게<span class="req">*</span></label>
@@ -1381,9 +1383,11 @@
       const bar = document.getElementById('guideBar');
       const toggle = document.getElementById('guideToggle');
 
+      const hint = document.getElementById('guideHint');
       toggle.addEventListener('click', () => {
         const opened = bar.classList.toggle('open');
         toggle.setAttribute('aria-expanded', opened);
+        if (hint) hint.textContent = opened ? '(눌러서 닫기)' : '(눌러서 펼치기)';
       });
     })();
 
