@@ -1012,7 +1012,7 @@
 
     <div class="guide-bar" id="guideBar">
       <button class="guide-bar-toggle" id="guideToggle" aria-expanded="false" aria-controls="guideContent">
-        <span>📌 이용방법 보기 <span class="guide-hint" id="guideHint">(눌러서 펼치기)</span></span>
+        <span>📌 이용방법 보기 <span class="guide-hint">(눌러서 펼치기)</span></span>
         <span class="guide-chevron">⌄</span>
       </button>
       <div class="guide-bar-content" id="guideContent">
@@ -1277,7 +1277,7 @@
           }
           const r = data[i++];
           const addr = r['전체 주소'];
-          const name = r['식당명'] || '(이름없음)';
+          const name = r['가게 이름'] || '(이름없음)';
           if (!addr) {
             console.warn('[geocode] SKIP (전체 주소 비어있음):', name, r);
             return next();
@@ -1319,7 +1319,7 @@
       const backdrop = document.getElementById('backdrop');
       const content = document.getElementById('sheetContent');
 
-      const name = r['식당명'] || '';
+      const name = r['가게 이름'] || '';
       const remain = (r['잔여건수'] === 0 || r['잔여건수']) ? r['잔여건수'] : null;
       const total = r['총 쿠폰수'];
 
@@ -1381,11 +1381,9 @@
       const bar = document.getElementById('guideBar');
       const toggle = document.getElementById('guideToggle');
 
-      const hint = document.getElementById('guideHint');
       toggle.addEventListener('click', () => {
         const opened = bar.classList.toggle('open');
         toggle.setAttribute('aria-expanded', opened);
-        if (hint) hint.textContent = opened ? '(눌러서 닫기)' : '(눌러서 펼치기)';
       });
     })();
 
@@ -1422,7 +1420,7 @@
           return;
         }
         list.forEach(r => {
-          const name = r['식당명'];
+          const name = r['가게 이름'];
           if (!name) return;
           const opt = document.createElement('option');
           opt.value = name;
@@ -1564,7 +1562,7 @@
         while (storeSel.options.length > 1) storeSel.remove(1);
         const list = window.__restaurants || [];
         list.forEach(r => {
-          const name = r['식당명']; if (!name) return;
+          const name = r['가게 이름']; if (!name) return;
           const remain = r['잔여건수'];
           const cat = (r['분류'] || '').trim();
           const tag = cat === '카페' ? '☕ 카페 · ' : (cat === '음식점' ? '🍚 음식점 · ' : (cat ? cat + ' · ' : ''));
