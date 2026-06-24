@@ -1021,15 +1021,20 @@
         <div class="guide-body">
           <div class="section-title">[이용방법]</div>
           <ol>
-            <li>지도에서 가게별 혜택 시간·쿠폰 할인 금액·메뉴 등을 확인하세요.</li>
-            <li>'혜택 이용하기'를 눌러 방문할 가게를 선택하세요.</li>
-            <li>문자로 받은 입장코드를 입력하면 혜택 대상자 화면이 나타납니다.</li>
-            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
-            <li>먹고 싶은 메뉴를 주문하세요.</li>
+            <li>지도에서 가게별 이용 시간·쿠폰 할인 금액·메뉴 등을 확인하세요.</li>
+            <li>남은 쿠폰이 있다면 가게를 방문해 주세요.</li>
+            <li>가게 도착 후 '혜택 이용하기'를 누르세요.</li>
+            <li>문자로 받은 입장코드를 입력하세요.</li>
+            <li>나타난 화면을 사장님께 보여주세요. (사장님이 '사용 처리'를 누릅니다)</li>
+            <li>드시고 싶은 메뉴를 주문하세요.</li>
           </ol>
+          <span class="usage-sub">· 쿠폰 금액, 이용 시간, 안내사항 등은 가게마다 다르니 꼭 확인하세요.</p>
           <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</p>
-          <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요. </p>
-          <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+          <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더 이상 이용할 수 없어요. </p>
+          <span class="usage-sub">· 이용 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+          <span class="usage-sub">· 쿠폰은 현금으로 교환되지 않으며, 차액도 환불되지 않아요.</span>
+          <span class="usage-sub">· 접속이 몰리면 처리가 지연될 수 있어요. 조금만 기다려 주세요.😊</span>
+
         </div>
       </div>
     </div>
@@ -1111,14 +1116,18 @@
           <div class="usage-title">[이용방법]</div>
           <ol class="usage-list">
             <li>방문하신 가게를 선택해 주세요.</li>
-            <li>문자로 받은 입장코드를 입력하면 혜택 적용 대상자 화면이 나타납니다.</li>
-            <li>화면을 사장님께 보여드리면 사장님이 '사용 처리'를 누릅니다.</li>
-            <li>먹고 싶은 메뉴를 주문하세요.</li>
+            <li>문자로 받은 입장코드를 입력하세요.</li>
+            <li>나타난 화면을 사장님께 보여주세요. (사장님이 '사용 처리'를 누릅니다)</li>
+            <li>드시고 싶은 메뉴를 주문하세요.</li>
+
           </ol>
           <div class="usage-notes">
+            <span class="usage-sub">· 쿠폰 금액, 이용 시간, 안내사항 등은 가게마다 다르니 꼭 확인하세요.</span>
             <span class="usage-sub">· 음식점 1회·카페 1회씩 매일 사용할 수 있어요.</span>
-            <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더이상 이용할 수 없어요.</span>
-            <span class="usage-sub">· 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+            <span class="usage-sub">· 가게별 남은 쿠폰이 모두 소진되면 더 이상 이용할 수 없어요.</span>
+            <span class="usage-sub">· 이용 예시) 10,000원 메뉴 → 3,000원 쿠폰 할인 → 7,000원 현장 결제</span>
+            <span class="usage-sub">· 쿠폰은 현금으로 교환되지 않으며, 차액도 환불되지 않아요.</span>
+            <span class="usage-sub">· 접속이 몰리면 처리가 지연될 수 있어요. 조금만 기다려 주세요.😊</span>
           </div>
         </div>
         <div class="form-field">
@@ -1634,14 +1643,19 @@
         markUsedError.hidden = true;
         if (!data || !data.ok) {
           emptyAll.hidden = false; dataView.hidden = true;
-          if (myUsageBtn) myUsageBtn.hidden = true;
-          emptyAll.innerHTML = reasonMsg(data && data.reason, data && data['분류']);
+          const rsn = data && data.reason;
+          // 코드는 유효하나 지금 못 쓰는 경우(오늘 사용·소진)엔 사용내역 보기 허용
+          const canHistory = (rsn === 'already_today' || rsn === 'sold_out');
+          if (myUsageBtn) myUsageBtn.hidden = !canHistory;
+          lastView = 'empty';
+          emptyAll.innerHTML = reasonMsg(rsn, data && data['분류']);
           return;
         }
         emptyAll.hidden = true; dataView.hidden = false;
         document.getElementById('useMainBlock').hidden = false;
         document.getElementById('myUsageView').hidden = true;
         if (myUsageBtn) myUsageBtn.hidden = false;
+        lastView = 'main';
         titleEl.textContent = '혜택 제공 대상자입니다';
         title2El.textContent = currentStore + (data['혜택'] ? ' · ' + data['혜택'] : '');
         title2El.style.display = '';
@@ -1705,6 +1719,7 @@
         } catch (e) {}
       }
 
+      let lastView = 'main';   // 사용내역에서 '뒤로'가 돌아갈 화면
       const myUsageBtn = document.getElementById('historyMyUsageBtn');
       const usageBackBtn = document.getElementById('usageBackBtn');
       const useMainBlock = document.getElementById('useMainBlock');
@@ -1729,8 +1744,24 @@
         }
       }
 
-      if (myUsageBtn) myUsageBtn.addEventListener('click', function () { useMainBlock.hidden = true; myUsageView.hidden = false; myUsageBtn.hidden = true; loadMyUsage(); });
-      if (usageBackBtn) usageBackBtn.addEventListener('click', function () { myUsageView.hidden = true; useMainBlock.hidden = false; myUsageBtn.hidden = false; });
+      if (myUsageBtn) myUsageBtn.addEventListener('click', function () {
+        emptyAll.hidden = true;
+        dataView.hidden = false;
+        useMainBlock.hidden = true;
+        myUsageView.hidden = false;
+        myUsageBtn.hidden = true;
+        usageBackBtn.textContent = (lastView === 'main') ? '← 사장님 처리 화면으로' : '← 뒤로 가기';
+        loadMyUsage();
+      });
+      if (usageBackBtn) usageBackBtn.addEventListener('click', function () {
+        myUsageView.hidden = true;
+        if (lastView === 'main') {
+          dataView.hidden = false; useMainBlock.hidden = false; emptyAll.hidden = true;
+        } else {
+          dataView.hidden = true; emptyAll.hidden = false;
+        }
+        myUsageBtn.hidden = false;
+      });
 
       openBtn.addEventListener('click', () => openModal());
       closeBtn.addEventListener('click', closeModal);
