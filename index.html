@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>🍚 라이더 배-네핏</title>
+  <title>배민라이더 식사 배-네핏</title>
   <style>
     :root {
       --primary: #2AC1BC;       /* 배민 민트 */
@@ -1003,8 +1003,11 @@
 <body>
   <div class="app">
     <header class="header">
-      <h1>[배민커넥트] 라이더 전용 식사 배-네핏 🍚</h1>
-      <p>점심피크 이후, 배달 활동에 든든한 힘이 되는 한 끼 혜택</p>
+      <h1>배민라이더 식사 배-네핏</h1>
+
+      <p>늘 함께 주시는 고마운 라이더님께,</p>
+      <p>🍚 식사도, ☕ 카페도 매일 누리는 특별하고 든든한 혜택</p>
+
     </header>
 
     <div class="header-cta-bar">
@@ -1610,7 +1613,7 @@
         lookupBtn.innerHTML = loading ? '<span class="btn-spinner"></span>확인 중입니다...' : '확인하기';
       }
       function reasonMsg(reason, cat) {
-        if (reason === 'invalid_code') return '혜택 대상자가 아니에요.<br>입장코드를 다시 확인해 주세요.';
+        if (reason === 'invalid_code') return '혜택 대상자가 아니에요.<br>입장코드를 다시 확인해 주세요.<br>(입장코드 7자리 중 가운데 한 글자는 영문자입니다.)';
         if (reason === 'no_store') return '식당을 다시 선택해 주세요.';
         if (reason === 'sold_out') return '이 가게의 혜택이 모두 소진됐어요.';
         if (reason === 'already_today') return '오늘은 이미 ' + (cat || '해당 분류') + ' 혜택을 사용했어요.<br>(내일 다시 이용 가능)';
