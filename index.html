@@ -1738,7 +1738,11 @@
           const list = (data && data.history) ? data.history : [];
           if (!list.length) { usageListBox.innerHTML = '<div class="usage-empty">아직 사용한 내역이 없어요.</div>'; return; }
           usageListBox.innerHTML = list.map(function (hh) {
-            return '<div class="usage-list-item"><span>' + escHtml(hh.store) + (hh.benefit ? ' · ' + escHtml(hh.benefit) : '') + '</span><span class="usage-list-date">' + fmtDate(hh.date) + '</span></div>';
+
+
+            return '<div class="usage-list-item"><span>' + escHtml(hh.store) + '</span><span class="usage-list-date">' + fmtDate(hh.date) + '</span></div>';
+
+
           }).join('');
         } catch (e) {
           usageListBox.innerHTML = '<div class="usage-empty">내역을 불러오지 못했어요.</div>';
